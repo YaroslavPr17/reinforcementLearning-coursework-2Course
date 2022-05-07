@@ -1,2 +1,2 @@
 class Object:
-    slots = 7
+    slots = 14
