@@ -121,7 +121,7 @@ class City:
                 intersection_finish.lanes['N'] = current_n_lanes
 
     def print_model_to_file(self, filename: str):
-        with open(Path('Environment', filename), 'w') as new_map_file:
+        with open(Path('Environment', filename), 'w', encoding='UTF-8') as new_map_file:
             for line in self.city_model:
                 print(*line, sep='', file=new_map_file)
 

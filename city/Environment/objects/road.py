@@ -1,6 +1,17 @@
 from Environment.objects.model_object import Object
 
 
+class Lane:
+    def __init__(self):
+        pass
+
+    def __str__(self):
+        return '_'
+
+    def __repr__(self):
+        self.__str__()
+
+
 class Road(Object):
     """
     A class for Road cell
@@ -29,20 +40,26 @@ class Road(Object):
     def __init__(self, orientation: str, lanes: dict, hard_marking: str = 's', soft_marking: str = 'b'):
         super().__init__()
         self.label = 'R'
-        self.direction = orientation
-        self.lanes = lanes
+        self.orientation = orientation
+        if self.orientation == 'v':
+            self.lanes = {'N': [Lane() for _ in range(lanes['N'])],
+                          'S': [Lane() for _ in range(lanes['S'])]}
+        else:
+            self.lanes = {'W': [Lane() for _ in range(lanes['W'])],
+                          'E': [Lane() for _ in range(lanes['E'])]}
         self.hard_marking = hard_marking
         self.soft_marking = soft_marking
 
     def __str__(self):
         out = f"{self.label}" \
-              f"({self.direction}"
-        if self.direction == 'v':
-            out += f"{[self.lanes['S'], self.lanes['N']]}"
+              f"({self.orientation}"
+        if self.orientation == 'v':
+            out += '_' * len(self.lanes['S']) + '|' + '_' * len(self.lanes['N'])
         else:
-            out += f"{[self.lanes['W'], self.lanes['E']]}"
+            out += '_' * len(self.lanes['W']) + '|' + '_' * len(self.lanes['E'])
         out += f"{self.hard_marking}" \
                f"{self.soft_marking})"
+
         return out.center(Road.slots)
 
     def __repr__(self):
