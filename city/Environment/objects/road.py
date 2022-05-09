@@ -27,6 +27,7 @@ class Road(Object):
     """
 
     def __init__(self, orientation: str, lanes: dict, hard_marking: str = 's', soft_marking: str = 'b'):
+        super().__init__()
         self.label = 'R'
         self.direction = orientation
         self.lanes = lanes
@@ -34,9 +35,15 @@ class Road(Object):
         self.soft_marking = soft_marking
 
     def __str__(self):
+        out = f"{self.label}" \
+              f"({self.direction}"
         if self.direction == 'v':
-            return f"{self.label}({self.direction}{[self.lanes['S'], self.lanes['N']]}{self.hard_marking}" \
-                   f"{self.soft_marking})".center(Road.slots)
+            out += f"{[self.lanes['S'], self.lanes['N']]}"
+        else:
+            out += f"{[self.lanes['W'], self.lanes['E']]}"
+        out += f"{self.hard_marking}" \
+               f"{self.soft_marking})"
+        return out.center(Road.slots)
 
-        return f"{self.label}({self.direction}{[self.lanes['W'], self.lanes['E']]}{self.hard_marking}" \
-               f"{self.soft_marking})".center(Road.slots)
+    def __repr__(self):
+        self.__str__()
