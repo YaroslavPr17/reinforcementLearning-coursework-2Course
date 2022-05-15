@@ -9,7 +9,7 @@ class Lane:
         return '_'
 
     def __repr__(self):
-        self.__str__()
+        return self.__str__()
 
 
 class Road(Object):
@@ -63,4 +63,4 @@ class Road(Object):
         return out.center(Road.slots)
 
     def __repr__(self):
-        self.__str__()
+        return self.__str__()
