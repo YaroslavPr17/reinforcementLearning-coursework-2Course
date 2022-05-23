@@ -1,4 +1,5 @@
 import math
+import sys
 from pathlib import Path
 from typing import Union
 from collections import namedtuple
@@ -13,11 +14,65 @@ from Environment.objects.model_object import Object
 from Environment.objects.road import Road
 from Environment.objects.car import Car
 from Environment.model import constants
+from Environment.model.constants import actions
 from Environment.model.state import lane_status
 from Environment.model.state import State
 from Environment.model.utils import *
 
 raw_data_path = Path("Environment", "raw_data")
+
+
+def _observation(city_model: list, direction: str, car_coord: CarCoord, normalize: bool = False) -> np.ndarray:
+    o = []
+    axis0, axis1 = car_coord.axis0, car_coord.axis1
+
+    if direction == 'N':
+        for a0 in range(axis0 - 1, axis0 + 1):
+            for a1 in range(axis1 - 1, axis1 + 2):
+                o.append(city_model[a0][a1])
+        obs = np.array(o).reshape(2, 3)
+    elif direction == 'S':
+        for a0 in range(axis0, axis0 + 2):
+            for a1 in range(axis1 - 1, axis1 + 2):
+                if isinstance(city_model[a0][a1], Road):
+                    o.append(city_model[a0][a1].swap_directions())
+                else:
+                    o.append(city_model[a0][a1])
+        obs = np.array(o).reshape(2, 3)
+    elif direction == 'W':
+        for a0 in range(axis0 - 1, axis0 + 2):
+            for a1 in range(axis1 - 1, axis1 + 1):
+                if isinstance(city_model[a0][a1], Road):
+                    o.append(city_model[a0][a1].swap_directions())
+                else:
+                    o.append(city_model[a0][a1])
+        obs = np.array(o).reshape(3, 2)
+    else:
+        for a0 in range(axis0 - 1, axis0 + 2):
+            for a1 in range(axis1, axis1 + 2):
+                o.append(city_model[a0][a1])
+        obs = np.array(o).reshape(3, 2)
+
+    if normalize:
+        if direction == 'W':
+            obs = np.rot90(obs, 3)
+        elif direction == 'E':
+            obs = np.rot90(obs, 1)
+        elif direction == 'S':
+            obs = np.rot90(obs, 2)
+    return obs
+
+def closest(target_dir: str, dirs: list):
+    directions = constants.cardinal_directions[1::2]
+    distances = []
+    for d in dirs:
+        dist = abs(directions.index(target_dir) - directions.index(d))
+        dist %= 5
+        distances.append(dist)
+    res = list(zip(dirs, distances))
+    res = filter(lambda t: t[1] <= 1, res)
+    res = [t[0] for t in res]
+    return res
 
 
 class City:
@@ -57,18 +112,72 @@ class City:
 
         # self.reward_range = np.arange()
 
-        # n_states =
+        n_states = 0
         n_actions = len(constants.actions)
+        self.n_actions = n_actions
         self.action_space = Discrete(n_actions)
 
         self.P = dict()
+        self.states = []
 
-        for d in constants.cardinal_directions[1::2]:
-            for c_d in constants.cardinal_directions:
-                for ln in [lane_status(*i) for i in product((True, False), repeat=2)]:
-                    for done in [True, False]:
-                        state = (d, c_d, ln, done)
-                        self.P[state] = {i: [] for i in range(len(constants.actions))}
+        # for car_road_cell in self.road_cells:
+        #     print(self.road_cells.index(car_road_cell), end=' ')
+        #     _road: Union[Road, list[Object]] = self.city_model[car_road_cell[0]][car_road_cell[1]]
+        #     car_coord = CarCoord(car_road_cell[0], car_road_cell[1])
+        #
+        #     for direction in 'NWES': # constants.oriented_directions[_road.orientation]:
+        #         observation = _observation(self.city_model, direction, car_coord, normalize=True)
+        #
+        #         for dest_road_cell in self.road_cells:
+        #             dest_coord = DestCoord(dest_road_cell[0], dest_road_cell[1])
+        #
+        #             for lane in range(_road.n_lanes.get(direction)), None:
+        #                 state = State(self.city_model, direction, car_coord, dest_coord, lane, observation)
+        #
+        #                 for action in actions:
+        #                     if car_road_cell == (31, 29) and direction == 'W' and dest_road_cell == (13, 33) and lane == 0:
+        #                         print("IN MODEL: ", hash(state), f"{action = }")
+        #                     if action == actions.FORWARD:
+        #                         new_state, reward, is_done = state.forward()
+        #                     elif action == actions.LEFT:
+        #                         new_state, reward, is_done = state.left()
+        #                     elif action == actions.RIGHT:
+        #                         new_state, reward, is_done = state.right()
+        #                     elif action == actions.LEFT_LANE:
+        #                         new_state, reward, is_done = state.left_lane()
+        #                     elif action == actions.RIGHT_LANE:
+        #                         new_state, reward, is_done = state.right_lane()
+        #                     elif action == actions.TURN_AROUND:
+        #                         new_state, reward, is_done = state.turn_around()
+        #                     else:
+        #                         new_state, reward, is_done = None, None, None
+        #
+        #                     # if car_road_cell == (31, 29) and direction == 'W' and dest_road_cell == (13, 33) and lane == 0:
+        #                     #     print("IN MODEL: ", state.__hash__())
+        #                     #     print(state)
+        #
+        #                     if state not in self.P:
+        #                         self.P[state] = dict()
+        #                         n_states += 1
+        #                         self.states.append(state)
+        #                     self.P[state][action] = (new_state, reward, is_done)
+
+
+        self.n_states = n_states
+        self.state = None
+        self.learning_state = None
+
+    @property
+    def all_observations(self):
+        obs = []
+        for road_cell in self.road_cells:
+            if self.city_model[road_cell[0]][road_cell[1]].orientation == 'v':
+                for orientation in ('N', 'S'):
+                    obs.append(_observation(self.city_model, orientation, CarCoord(*road_cell), normalize=True))
+            else:
+                for orientation in ('W', 'E'):
+                    obs.append(_observation(self.city_model, orientation, CarCoord(*road_cell), normalize=True))
+        return obs
 
     @property
     def _random_road(self):
@@ -89,46 +198,13 @@ class City:
 
         dest_coord = DestCoord(*self._random_road)
 
-        observation = self._observation(direction, car_coord)
-        if direction in ('W', 'E'):
-            observation = np.reshape(observation, (3, 2))
-            if direction == 'W':
-                observation = np.rot90(observation, 3)
-            else:
-                observation = np.rot90(observation, 1)
-        else:
-            observation = np.reshape(observation, (2, 3))
-            if direction == 'S':
-                observation = np.rot90(observation, 2)
+        observation = _observation(self.city_model, direction, car_coord, normalize=True)
 
         return State(self.city_model, direction, car_coord, dest_coord, lane, observation)
 
-    def _observation(self, direction: str, car_coord: CarCoord) -> np.ndarray:
-        o = []
-        axis0, axis1 = car_coord.axis0, car_coord.axis1
-        if direction == 'N':
-            for a0 in range(axis0 - 1, axis0 + 1):
-                for a1 in range(axis1 - 1, axis1 + 2):
-                    o.append(self.city_model[a0][a1])
-            return np.array(o).reshape(2, 3)
-        elif direction == 'S':
-            for a0 in range(axis0, axis0 + 2):
-                for a1 in range(axis1 - 1, axis1 + 2):
-                    o.append(self.city_model[a0][a1])
-            return np.array(o).reshape(2, 3)
-        elif direction == 'W':
-            for a0 in range(axis0 - 1, axis0 + 2):
-                for a1 in range(axis1 - 1, axis1 + 1):
-                    o.append(self.city_model[a0][a1])
-            return np.array(o).reshape(3, 2)
-        else:
-            for a0 in range(axis0 - 1, axis0 + 2):
-                for a1 in range(axis1, axis1 + 2):
-                    o.append(self.city_model[a0][a1])
-            return np.array(o).reshape(3, 2)
-
     def reset(self) -> State:
-        return self._generate_initial_state()
+        self.state: State = self._generate_initial_state()
+        return self.state
 
     def _make_intersections(self):
         for axis0, axis1 in self.intersections:
@@ -213,8 +289,25 @@ class City:
             for line in self.city_model:
                 print(*line, sep='', file=new_map_file)
 
-    def step(self):
-        pass
+    def step(self, action):
+        print(self.state in self.states)
+
+        new_state, reward, is_done = self.P[self.state][action]
+        return new_state, reward, is_done
+
 
     def check_traffic_regulations(self, observation: tuple):
         pass
+
+    def move_car(self, direction: str, action: int):
+        new_direction = constants.next_direction.get(direction)[action]
+        if action == constants.actions.LEFT_LANE or actions.RIGHT_LANE:
+            pass
+        if direction == 'W':
+            new_car_coord = CarCoord(self.state.car_coordinates.axis0, self.state.car_coordinates.axis1 - 1)
+        elif direction == 'E':
+            new_car_coord = CarCoord(self.state.car_coordinates.axis0, self.state.car_coordinates.axis1 + 1)
+        elif direction == 'N':
+            new_car_coord = CarCoord(self.state.car_coordinates.axis0 - 1, self.state.car_coordinates.axis1)
+        elif direction == 'S':
+            new_car_coord = CarCoord(self.state.car_coordinates.axis0 + 1, self.state.car_coordinates.axis1)
