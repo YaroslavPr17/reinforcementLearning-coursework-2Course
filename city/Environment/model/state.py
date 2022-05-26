@@ -18,6 +18,37 @@ def lane_status(is_left: bool, is_right: bool):
 
 
 class State:
+    """
+    The class describes an Observation (in terms of RL), which means several fields which determine the position of Agent
+    within our Environment.
+
+    Attributes
+    ----------
+    :param city_model: The Environment which Agent interacts with
+    :type city_model: list[list]
+    :param current_direction: The capital letter, corresponding to one of cardinal directions.
+        'N' - North
+        'S' - South
+        'W' - West
+        'E' - East
+    :type current_direction: str
+    :param car_coordinates: The collections.namedtuple formatted to represent Agent's current coordinates (similar with numpy-array's.).
+        axis0 - vertical coordinate
+        axis1 - horizontal coordinate
+    :type car_coordinates: CarCoord
+    :param destination_coordinates: The collections.namedtuple formatted to represent coordinates of destination point (similar with numpy-array's.).
+        axis0 - vertical coordinate
+        axis1 - horizontal coordinate
+    :type destination_coordinates: DestCoord
+    :param current_lane: The ordinal number of the current lane taken by Agent.
+        None - if the lane cannot be defined
+        int - if Agent is on road or ready to start from the intersection.
+    :type: current_lane: int or None
+    :param observation: the pool of cell of Environment, witnessing by Agent.
+    :type: observation: np.ndarray
+
+    """
+
     def __init__(self, city_model: list,
                  current_direction: str,
                  car_coordinates: CarCoord,
@@ -44,7 +75,8 @@ class State:
                f"{self.car_coordinates}\n" \
                f"{self.destination_coordinates}\n" \
                f"{self.current_lane = }\n" \
-               f"{self.observation}"
+               f"{self.observation}" \
+               f"\n\n"
 
     def __repr__(self):
         return self.__str__()
@@ -112,6 +144,10 @@ class State:
         return self.current_direction, approx_dir, lane_type, self.observation, is_done
 
     def forward(self):
+        """
+        :return: destination state after moving forward from the current state.
+        :rtype: State
+        """
         new_current_direction = self.current_direction
 
         if self.current_direction == 'W':
@@ -130,6 +166,7 @@ class State:
         if isinstance(self._in_front_of, ground.Ground):
             # If there is no road
             # print("Что-то прекрасное")
+            new_car_coordinates = self.car_coordinates
             new_current_lane = None
             reward += constants.rewards.out_of_road
             is_done = True
@@ -152,8 +189,9 @@ class State:
             reward += constants.rewards.out_of_road
             is_done = True
 
-        elif isinstance(self.observation[1][1], road.Road) and self._in_front_of.n_lanes.get(self.current_direction) < self._car_pos.n_lanes.get(self.current_direction) and \
-            self.current_lane == self._in_front_of.n_lanes.get(self.current_direction) - 1:
+        elif isinstance(self.observation[1][1], road.Road) and \
+                self._in_front_of.n_lanes.get(self.current_direction) < self._car_pos.n_lanes.get(self.current_direction) and \
+                self.current_lane == self._car_pos.n_lanes.get(self.current_direction) - 1:
             # print(self.current_lane, self.observation[1][1].n_lanes.get(self.current_direction) - 1)
             # Road narrowing happened
             # print("Что-то сложное")
@@ -173,12 +211,28 @@ class State:
         # else:
         #     new_current_lane = None
 
+        if new_car_coordinates.axis0 == new_destination_coordinates.axis0 and \
+                new_car_coordinates.axis1 == new_destination_coordinates.axis1:
+            is_done = True
+            reward += constants.rewards.finished
+
+            # print("FINISHED! УРА!!!")
+
+            if new_current_lane != 0:
+                reward += constants.rewards.stop_in_the_middle_road
+
         new_observation = city._observation(self.city_model, new_current_direction, new_car_coordinates, normalize=True)
+
+        # print("State with new car_coordinates was created:", new_car_coordinates)
 
         return State(self.city_model, new_current_direction, new_car_coordinates, new_destination_coordinates,
                      new_current_lane, new_observation), reward, is_done
 
     def left(self):
+        """
+        :return: destination state after turning left from the current state.
+        :rtype: State
+        """
         new_current_direction = left(self.current_direction)
 
         new_car_coordinates = self.car_coordinates
@@ -193,7 +247,7 @@ class State:
             is_done = True
 
         elif isinstance(self._car_pos, intersection.Intersection):
-            new_current_lane = self._car_pos.lanes.get(new_current_direction, None)
+            new_current_lane = self._car_pos.n_lanes.get(new_current_direction, None)
             if new_current_lane is not None:
                 new_current_lane -= 1
 
@@ -203,6 +257,10 @@ class State:
                      new_current_lane, new_observation), reward, is_done
 
     def right(self):
+        """
+        :return: destination state after turning right from the current state.
+        :rtype: State
+        """
         new_current_direction = right(self.current_direction)
 
         new_car_coordinates = self.car_coordinates
@@ -217,7 +275,7 @@ class State:
             is_done = True
 
         elif isinstance(self._car_pos, intersection.Intersection):
-            new_current_lane = self._car_pos.lanes.get(new_current_direction, None)
+            new_current_lane = self._car_pos.n_lanes.get(new_current_direction, None)
             if new_current_lane is not None:
                 new_current_lane = 0
 
@@ -227,17 +285,21 @@ class State:
                      new_current_lane, new_observation), reward, is_done
 
     def turn_around(self):
+        """
+        :return: destination state after turning around from the current state.
+        :rtype: State
+        """
         new_current_direction = opposite(self.current_direction)
 
         new_car_coordinates = self.car_coordinates
 
         new_destination_coordinates = self.destination_coordinates
 
-        reward = rewards.basic
+        reward = rewards.basic_turn_around_on_road
         is_done = False
         if isinstance(self._car_pos, intersection.Intersection):
             # When intersection, cannot define lane
-            reward += constants.rewards.turn_on_intersection
+            reward += constants.rewards.turn_around_on_intersection
             new_current_lane = None
         elif isinstance(self._car_pos, road.Road):
             # Happens on road
@@ -264,15 +326,35 @@ class State:
                 if self.current_lane is None:
                     new_current_lane = None
                 else:
-                    print(f"{new_current_direction = }")
-                    print(f"{self._car_pos.lanes.get(new_current_direction) = }")
-                    print(f"{self._car_pos.n_lanes.get(new_current_direction) = }")
+                    # print(f"{new_current_direction = }")
+                    # print(f"{self._car_pos.lanes.get(new_current_direction) = }")
+                    # print(f"{self._car_pos.n_lanes.get(new_current_direction) = }")
                     if new_current_direction in 'NE':
-                        new_current_lane = self._car_pos.lanes.get(new_current_direction)[::-1] \
+                        try:
+                            new_current_lane = self._car_pos.lanes.get(self.current_direction)\
                             [self._car_pos.n_lanes.get(new_current_direction) - 1]
+                        except IndexError:
+                            print(self.current_direction)
+                            print(f"{self._car_pos.lanes.get(self.current_direction)[::-1] = }")
+                            print(f"{self._car_pos.n_lanes.get(self.current_direction) - 1 = }\n")
+                            print(new_current_direction)
+                            print(f"{self._car_pos.lanes.get(new_current_direction)[::-1] = }")
+                            print(f"{self._car_pos.n_lanes.get(new_current_direction) - 1 = }")
+                            raise IndexError
                     else:
                         new_current_lane = self._car_pos.lanes.get(new_current_direction) \
                         [self._car_pos.n_lanes.get(new_current_direction) - 1]
+
+        if new_car_coordinates.axis0 == new_destination_coordinates.axis0 and \
+            new_car_coordinates.axis1 == new_destination_coordinates.axis1:
+            is_done = True
+            reward += constants.rewards.finished
+
+            # print("FINISHED! УРА!!!")
+
+            if new_current_lane != 0:
+                reward += constants.rewards.stop_in_the_middle_road
+
 
 
         new_observation = city._observation(self.city_model, new_current_direction, new_car_coordinates, normalize=True)
@@ -281,6 +363,10 @@ class State:
                      new_current_lane, new_observation), reward, is_done
 
     def left_lane(self):
+        """
+        :return: destination state after moving to the left lane from the current state.
+        :rtype: State
+        """
         new_current_direction = self.current_direction
 
         if self.current_direction == 'W':
@@ -298,11 +384,15 @@ class State:
         is_done = False
         if isinstance(self._in_front_of, road.Road):
             # Happens on road
+            # print(self.current_lane)
             if self._in_front_of.is_lane_valid(new_current_direction, self.current_lane):
                 # Current lane forward is available
-                if self._in_front_of.is_lane_valid(new_current_direction, self.current_lane + 1):
+                if self.current_lane is None or self._in_front_of.is_lane_valid(new_current_direction, self.current_lane + 1):
                     # Left lane forward is available
-                    new_current_lane = self.current_lane + 1
+                    if self.current_lane is None:
+                        new_current_lane = None
+                    else:
+                        new_current_lane = self.current_lane + 1
                 else:
                     if self._in_front_of.n_lanes.get(opposite(self.current_direction)) > 0:
                         new_current_lane = None
@@ -319,6 +409,17 @@ class State:
         else:
             new_current_lane = None
             reward = rewards.change_lane_not_on_road
+            is_done = True
+
+        if new_car_coordinates.axis0 == new_destination_coordinates.axis0 and \
+                new_car_coordinates.axis1 == new_destination_coordinates.axis1:
+            is_done = True
+            reward += constants.rewards.finished
+
+            # print("FINISHED! УРА!!!")
+
+            if new_current_lane != 0:
+                reward += constants.rewards.stop_in_the_middle_road
 
         new_observation = city._observation(self.city_model, new_current_direction, new_car_coordinates, normalize=True)
 
@@ -326,6 +427,10 @@ class State:
                      new_current_lane, new_observation), reward, is_done
 
     def right_lane(self):
+        """
+        :return: destination state after moving to the right lane from the current state.
+        :rtype: State
+        """
         new_current_direction = self.current_direction
 
         if self.current_direction == 'W':
@@ -345,9 +450,12 @@ class State:
             # Happens on road
             if self._in_front_of.is_lane_valid(new_current_direction, self.current_lane):
                 # Current lane forward is available
-                if self._in_front_of.is_lane_valid(new_current_direction, self.current_lane - 1):
+                if self.current_lane is None or self._in_front_of.is_lane_valid(new_current_direction, self.current_lane - 1):
                     # Right lane forward is available
-                    new_current_lane = self.current_lane - 1
+                    if self.current_lane is None:
+                        new_current_lane = None
+                    else:
+                        new_current_lane = self.current_lane - 1
                 else:
                     new_current_lane = None
                     reward = rewards.out_of_road
@@ -359,8 +467,24 @@ class State:
         else:
             new_current_lane = None
             reward = rewards.change_lane_not_on_road
+            is_done = True
+
+        if new_car_coordinates.axis0 == new_destination_coordinates.axis0 and \
+                new_car_coordinates.axis1 == new_destination_coordinates.axis1:
+            is_done = True
+            reward += constants.rewards.finished
+
+            # print("FINISHED! УРА!!!")
+
+            if new_current_lane != 0:
+                reward += constants.rewards.stop_in_the_middle_road
 
         new_observation = city._observation(self.city_model, new_current_direction, new_car_coordinates, normalize=True)
 
         return State(self.city_model, new_current_direction, new_car_coordinates, new_destination_coordinates,
                      new_current_lane, new_observation), reward, is_done
+
+    def visualize(self):
+        out = f"{self.car_coordinates} -> {self.destination_coordinates}" \
+               f"dir={self.current_direction}, lane={self.current_lane}"
+        return out

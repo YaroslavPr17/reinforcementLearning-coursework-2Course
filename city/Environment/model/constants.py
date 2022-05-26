@@ -19,11 +19,26 @@ cardinal_directions = ('SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E')
 oriented_directions = {'v': 'NS', 'h': 'WE'}
 
 rewards = namedtuple('Rewards', (
-    'basic',
+
     'out_of_road',
-    'turn_on_road',
-    'turn_on_intersection',
     'solid_line_crossing',
+    'turn_on_road',
+    'stop_in_the_middle_road',
     'change_lane_not_on_road',
-    'wrong_lane_to_turn'
-))(-10, -500, -400, -400, -300, -250, -250)
+    'turn_around_on_intersection',
+    'wrong_lane_to_turn',
+    'basic_turn_around_on_road',
+    'basic',
+    'finished'
+))(
+    -10000,
+    -5000,
+    -4000,
+    -4000,
+    -2000,
+    -1000,
+    -1000,
+    -2400,
+    -300,
+    10000
+)

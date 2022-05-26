@@ -23,7 +23,7 @@ class Road(Object):
 
     Attributes
     ----------
-    :param orientation:  str
+    :param orientation: str
         The orientation of the road.
             'v' - vertical
             'h' - horizontal
@@ -103,7 +103,8 @@ class Road(Object):
     def is_lane_valid(self, direction: str, lane_num: int):
         if self.n_lanes.get(direction) is None:
             return False
-        if 0 <= lane_num <= self.n_lanes.get(direction) - 1:
+
+        if lane_num is None or 0 <= lane_num <= self.n_lanes.get(direction) - 1:
             return True
 
 
