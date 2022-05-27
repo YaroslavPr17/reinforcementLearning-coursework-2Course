@@ -24,6 +24,9 @@ from Environment.model.utils import *
 
 map_path = Path("Environment", "raw_data")
 
+iteration = 1
+rep_array = [-1 for _ in range(5)]
+
 
 def _observation(city_model: list, direction: str, car_coord: CarCoord, normalize: bool = False) -> np.ndarray:
     o = []
@@ -65,18 +68,6 @@ def _observation(city_model: list, direction: str, car_coord: CarCoord, normaliz
         elif direction == 'S':
             obs = np.rot90(obs, 2)
     return obs
-
-def closest(target_dir: str, dirs: list):
-    directions = constants.cardinal_directions[1::2]
-    distances = []
-    for d in dirs:
-        dist = abs(directions.index(target_dir) - directions.index(d))
-        dist %= 5
-        distances.append(dist)
-    res = list(zip(dirs, distances))
-    res = filter(lambda t: t[1] <= 1, res)
-    res = [t[0] for t in res]
-    return res
 
 
 class City:
@@ -143,7 +134,11 @@ class City:
 
                     dest_coord = DestCoord(dest_road_cell[0], dest_road_cell[1])
 
-                    n_lanes = _road.n_lanes.get(direction)
+                    if isinstance(_road, Intersection):
+                        n_lanes = 5
+                        # print(car_coord, "Intersection!", n_lanes, '- lanes max')
+                    else:
+                        n_lanes = _road.n_lanes.get(direction)
                     if n_lanes is not None and n_lanes != 0:
                         n_lanes = range(n_lanes)
                     else:
@@ -311,8 +306,6 @@ class City:
             for line in self.city_model:
                 print(*line, sep='', file=new_map_file)
 
-    def step(self, action):
-        # print(self.state in self.states)
-
+    def step(self, action: int) -> tuple:
         new_state, reward, is_done = self.P[self.state][action]
         return new_state, reward, is_done

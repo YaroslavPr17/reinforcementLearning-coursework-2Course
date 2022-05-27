@@ -1,4 +1,7 @@
 from Environment.objects.model_object import Object
+from collections import namedtuple
+
+n_lanes = namedtuple('LanesNumber', ['N', 'W', 'E', 'S'])
 
 
 class Intersection(Object):
@@ -7,7 +10,7 @@ class Intersection(Object):
         if lanes is None:
             lanes = dict()
         self.label = 'X'
-        self.n_lanes = lanes
+        self.n_lanes = n_lanes(lanes.get('N', 0), lanes.get('W', 0), lanes.get('E', 0), lanes.get('S', 0))._asdict()
 
 
     def __str__(self):
