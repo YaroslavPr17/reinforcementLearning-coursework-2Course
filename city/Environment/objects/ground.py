@@ -11,3 +11,6 @@ class Ground(Object):
 
     def __str__(self):
         return f"{self.label}()".center(Ground.slots)
+
+    def __copy__(self):
+        return Ground()
