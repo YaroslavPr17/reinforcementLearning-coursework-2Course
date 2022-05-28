@@ -3,6 +3,7 @@ import numpy as np
 
 CarCoord = namedtuple('CarCoord', 'axis0 axis1')
 DestCoord = namedtuple('DestCoord', 'axis0 axis1')
+IntersectCoord = namedtuple('IntersectCoord', 'axis0 axis1')
 
 
 def left(direction: str):

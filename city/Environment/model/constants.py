@@ -9,6 +9,8 @@ h_actions = ('FORWARD',
              'TURN_AROUND')
 actions = namedtuple('Actions', h_actions)(*np.arange(len(h_actions)))
 
+MAX_N_LANES = 5
+
 next_direction = {'N': ['N', 'W', 'E', 'N', 'N', 'N', 'S'],
                   'W': ['W', 'S', 'N', 'W', 'W', 'W', 'E'],
                   'E': ['E', 'N', 'S', 'E', 'E', 'E', 'W'],

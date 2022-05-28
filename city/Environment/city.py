@@ -67,7 +67,8 @@ class City:
 
     np.random.seed(123)
 
-    def __init__(self, map_sample: int = 0, layout_sample: int = 0, narrowing_and_expansion: bool = True):
+    def __init__(self, map_sample: int = 0, layout_sample: int = 0, narrowing_and_expansion: bool = True,
+                 pedestrian_crossings: bool = True, traffic_lights: bool = True):
 
         from Environment.raw_data.roads_descriptor import roads_desc
 
@@ -94,15 +95,17 @@ class City:
         print("Ground was built.")
 
         self._make_intersections()
+        print("Intersections were built.")
         self._make_roads(narrowing_and_expansion)
-        print("Intersections and roads were built.")
+        print("Roads were built.")
+        self._finalize_intersections()
+        print("Intersections were finalized.")
 
         self.print_model_to_file(map_name[0:-4] + 'model.txt')
 
-        n_states = 0
-        n_actions = len(constants.actions)
-        self.n_actions = n_actions
-        self.action_space = Discrete(n_actions)
+        # n_states = 0
+        self.n_actions = len(constants.actions)
+        self.action_space = [a for a in range(self.n_actions)]
 
         self.P = dict()
         self.states = []
@@ -121,7 +124,7 @@ class City:
                     dest_coord = DestCoord(dest_road_cell[0], dest_road_cell[1])
 
                     if isinstance(_road, Intersection):
-                        n_lanes = 5
+                        n_lanes = constants.MAX_N_LANES
                     else:
                         n_lanes = _road.n_lanes.get(direction)
                     if n_lanes is not None and n_lanes != 0:
@@ -149,13 +152,13 @@ class City:
 
                             if state not in self.P.keys():
                                 self.P[state] = dict()
-                                n_states += 1
+                                # n_states += 1
                                 self.states.append(state)
                             self.P[state][action] = (new_state, reward, is_done)
 
         print('Transition dictionary was built.')
 
-        self.n_states = n_states
+        # self.n_states = n_states
         self.state = None
         self.learning_state = None
 
@@ -204,7 +207,7 @@ class City:
         for axis0, axis1 in self.intersections:
             self.city_model[axis0][axis1] = Intersection()
 
-    def _make_roads(self, narrowing_and_expansion: bool = False) -> None:
+    def _make_roads(self, narrowing_and_expansion: bool) -> None:
         np.random.seed(123)
         _LANES_AVAILABLE = [1, 2, 3]
         _LANE_TRANSFORMATIONS = [-1, 0, 1]
@@ -278,6 +281,26 @@ class City:
                              'b')
 
                 intersection_finish.n_lanes['N'] = current_n_lanes
+
+    def _finalize_intersections(self):
+        iter_intersections = [IntersectCoord(*intersection_index) for intersection_index in self.intersections]
+        for i in iter_intersections:
+            local_intersection: Union[Intersection, list[Object]] = self.city_model[i.axis0][i.axis1]
+            up_obj = self.city_model[i.axis0 - 1][i.axis1]
+            down_obj = self.city_model[i.axis0 + 1][i.axis1]
+            left_obj = self.city_model[i.axis0][i.axis1 - 1]
+            right_obj = self.city_model[i.axis0][i.axis1 + 1]
+
+            if isinstance(up_obj, Road):
+                local_intersection.n_in_lanes['N'] = up_obj.n_lanes.get('S')
+            if isinstance(left_obj, Road):
+                local_intersection.n_in_lanes['W'] = left_obj.n_lanes.get('E')
+            if isinstance(right_obj, Road):
+                local_intersection.n_in_lanes['E'] = right_obj.n_lanes.get('W')
+            if isinstance(down_obj, Road):
+                local_intersection.n_in_lanes['S'] = down_obj.n_lanes.get('N')
+
+
 
     def print_model_to_file(self, filename: str):
         with open(Path('Environment', filename), 'w', encoding='UTF-8') as new_map_file:
