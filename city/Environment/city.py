@@ -73,7 +73,7 @@ class City:
         from Environment.raw_data.roads_descriptor import roads_desc
 
         city_map = []
-        map_name = os.listdir(r'Environment\raw_data')[map_sample]
+        map_name = os.listdir(Path('Environment', 'raw_data'))[map_sample]
         with open(Path('Environment', 'raw_data', map_name), 'r') as map_file:
             line = map_file.readline()
             while line:

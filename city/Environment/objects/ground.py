@@ -6,11 +6,11 @@ class Ground(Object):
         super().__init__()
         self.label = 'G'
 
-    def __repr__(self):
-        return f"{self.label}()".center(Ground.slots)
-
     def __str__(self):
-        return f"{self.label}()".center(Ground.slots)
+        return f"{self.label}()".ljust(Ground.slots)
+
+    def __repr__(self):
+        return self.__str__()
 
     def __copy__(self):
         return Ground()

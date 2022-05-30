@@ -42,7 +42,8 @@ class Road(Object):
             'b'  - broken
     """
 
-    def __init__(self, orientation: str, lanes: dict, hard_marking: str = 's', soft_marking: str = 'b', num_lanes: n_lanes = None):
+    def __init__(self, orientation: str, lanes: dict, hard_marking: str = 's', soft_marking: str = 'b',
+                 num_lanes: n_lanes = None, is_locked: bool = False):
         super().__init__()
         self.label = 'R'
         self.orientation = orientation
@@ -61,6 +62,7 @@ class Road(Object):
 
         self.hard_marking = hard_marking
         self.soft_marking = soft_marking
+        self.is_locked = is_locked
 
     def __str__(self):
         out = f"{self.label}" \
@@ -74,7 +76,7 @@ class Road(Object):
         out += f"{self.hard_marking}" \
                f"{self.soft_marking})"
 
-        return out.center(Road.slots)
+        return out.ljust(Road.slots)
 
     def __repr__(self):
         return self.__str__()
@@ -95,10 +97,12 @@ class Road(Object):
 
         new_soft_marking = self.soft_marking
 
-        return Road(new_orientation, new_lanes, new_hard_marking, new_soft_marking, new_n_lanes)
+        new_is_locked = self.is_locked
 
-    def __copy__(self):
-        return Road(self.orientation, self.lanes, self.hard_marking, self.soft_marking)
+        return Road(new_orientation, new_lanes, new_hard_marking, new_soft_marking, new_n_lanes, new_is_locked)
+
+    # def __copy__(self):
+    #     return Road(self.orientation, self.lanes, self.hard_marking, self.soft_marking)
 
     def is_lane_valid(self, direction: str, lane_num: int):
         if self.n_lanes.get(direction) is None:

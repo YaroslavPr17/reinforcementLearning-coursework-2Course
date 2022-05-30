@@ -68,3 +68,7 @@ def sample(iterable_object):
     Random element from the given iterable object
     """
     return np.random.choice(iterable_object)
+
+
+def lane_status(is_left: bool, is_right: bool):
+    return namedtuple('LaneInfo', 'is_left is_right')(is_left, is_right)
