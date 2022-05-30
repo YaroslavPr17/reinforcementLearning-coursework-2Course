@@ -20,7 +20,7 @@ class Intersection(Object):
     def __str__(self):
         return f"{self.label}" \
                f"({self.n_lanes.get('N', '')}{self.n_lanes.get('W', '')}{self.n_lanes.get('E', '')}{self.n_lanes.get('S', '')},"\
-               f"{sum(self.n_lanes.values())})".center(Intersection.slots)
+               f"{sum(self.n_lanes.values())})".ljust(Intersection.slots)
 
     def __repr__(self):
         return self.__str__()
