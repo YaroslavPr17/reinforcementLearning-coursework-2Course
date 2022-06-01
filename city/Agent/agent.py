@@ -139,22 +139,26 @@ class Agent:
         Test agent's performance on n_episodes different initial states and prints the number of successful and
         absolutely successful trials.
         """
-        c = 0
+        n_successful_trials = 0
         next_to_border = 0
         for episode in range(n_episodes):
             self.state = self.env.reset()
             print('INITIAL STATE:\n', self.state)
+
 
             is_done = False
 
             sum_reward = 0
 
             while not is_done:
-                # action = np.argmax(agent.q_table[agent.state])
-                if np.random.uniform(0, 1) < 0.999:
+                if isinstance(np.argmax(self.q_table[self.state]), np.int64):
                     action = np.argmax(self.q_table[self.state])
                 else:
-                    action = np.random.choice(np.argpartition(self.q_table[self.state], -2)[-2:])
+                    action = list(np.argmax(self.q_table[self.state]))[0]
+                # if np.random.uniform(0, 1) < 0.999:
+                #     action = np.argmax(self.q_table[self.state])
+                # else:
+                #     action = np.random.choice(np.argpartition(self.q_table[self.state], -2)[-2:])
 
                 print('action =', action)
 
@@ -164,14 +168,14 @@ class Agent:
                         next_state.car_coordinates.axis1 == next_state.destination_coordinates.axis1:
                     if next_state.current_lane == 0:
                         next_to_border += 1
-                    c += 1
+                    n_successful_trials += 1
 
                 sum_reward += reward
                 self.state = next_state
                 self.env.state = next_state
 
             print(f"Episode {episode}: {sum_reward = }\n\n")
-        print(f"{c}/{n_episodes} objects reached their destination. Where {next_to_border = }")
+        print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
 
     def reset(self):
         self.state = self.env.reset()
@@ -194,25 +198,34 @@ class Agent:
             compressed_q_table[state.to_transition_state()]: list = list()
         for state in self.q_table.keys():
             compressed_q_table[state.to_transition_state()].append(self.q_table[state])
+
         for transition_state in compressed_q_table.keys():
             q_pool_for_all_actions = np.array(compressed_q_table[transition_state])
             generalized_q_values = []
-            for n_a in range(self.env.n_actions):
-                q_values = q_pool_for_all_actions[:, n_a]
-                q_values = q_values[q_values != MIN_REWARD]
-                if q_values.size == 0:
-                    q_value = MIN_REWARD
-                else:
-                    if strategy == 'max':
-                        q_value = np.max(q_values)
-                    elif strategy == 'mean':
-                        q_value = np.mean(q_values)
-                    elif strategy == 'min':
-                        q_value = np.min(q_values)
+            if strategy == 'random':
+                generalized_q_values = q_pool_for_all_actions[np.random.randint(0, q_pool_for_all_actions.shape[0])]
+            elif strategy == 'smart':
+                q = q_pool_for_all_actions
+                most_popular_actions = np.apply_along_axis(np.argmax, 1, q)
+                action = np.argmax(np.bincount(most_popular_actions))
+                generalized_q_values = [0] * self.env.n_actions
+                generalized_q_values[action] = 1
+            else:
+                for n_a in range(self.env.n_actions):
+                    q_values = q_pool_for_all_actions[:, n_a]
+                    q_values = q_values[q_values != MIN_REWARD]
+                    if q_values.size == 0:
+                        q_value = MIN_REWARD
                     else:
-                        raise ValueError('Wrong strategy to compress q_table')
-
-                generalized_q_values.append(q_value)
+                        if strategy == 'max':
+                            q_value = np.max(q_values)
+                        elif strategy == 'mean':
+                            q_value = np.mean(q_values)
+                        elif strategy == 'min':
+                            q_value = np.min(q_values)
+                        else:
+                            raise ValueError('Wrong strategy to compress q_table')
+                    generalized_q_values.append(q_value)
             compressed_q_table[transition_state] = generalized_q_values
         return compressed_q_table
 
@@ -233,3 +246,18 @@ class Agent:
     def write_compressed_q_table_to_file(filename: str, compressed_q_table: dict):
         with open('learning_data\\' + filename, 'wb') as q_file:
             pickle.dump(compressed_q_table, q_file)
+
+    def finalize(self):
+        states_to_delete = []
+        for state in self.q_table.keys():
+            if all(map(lambda t: t == 0, self.q_table[state])):
+                states_to_delete.append(state)
+
+        for s in states_to_delete:
+            self.q_table.pop(s)
+
+        for state in self.q_table.keys():
+            for n_a in actions:
+                if self.q_table[state][n_a] == 0:
+                    self.q_table[state][n_a] = MIN_REWARD
+

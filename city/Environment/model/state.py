@@ -138,6 +138,10 @@ class State:
         new_destination_coordinates = self.destination_coordinates
 
         reward = rewards.basic_forward
+
+        if self.get_approx_dir() not in constants.close[self.current_direction]:
+            reward += rewards.forward_not_in_correct_direction
+            # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
         is_done = False
         if isinstance(self._in_front_of, ground.Ground):
             # * -> Ground
@@ -217,6 +221,10 @@ class State:
             is_done = True
 
         elif isinstance(self._car_pos, intersection.Intersection):
+
+            if self._car_pos.n_lanes.get(new_current_direction) == 0:
+                reward += rewards.tricky_turn
+                is_done = True
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
             if new_current_lane != 0:
                 new_current_lane -= 1
@@ -260,6 +268,9 @@ class State:
             is_done = True
 
         elif isinstance(self._car_pos, intersection.Intersection):
+            if self._car_pos.n_lanes.get(new_current_direction) == 0:
+                reward += rewards.tricky_turn
+                is_done = True
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
             if new_current_lane != 0:
                 new_current_lane = 0
@@ -299,6 +310,14 @@ class State:
             # When intersection, cannot define lane
             reward += constants.rewards.turn_around_on_intersection
             new_current_lane = None
+
+            if (isinstance(self._in_front_of, ground.Ground) or
+                isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(
+                        self.current_direction) == 0) and \
+                    isinstance(self._left, ground.Ground) and isinstance(self._right, ground.Ground):
+                # If lock was met and possible to consider turn_around
+                reward += rewards.positive_turn_around
+
         elif isinstance(self._car_pos, road.Road):
             # On road
             reward += rewards.turn_around_on_road
@@ -313,12 +332,6 @@ class State:
             if self._car_pos.hard_marking in ('ds', 's'):
                 # Hard marking is solid or double solid
                 reward += constants.rewards.turn_around_through_solid_line
-
-            if (isinstance(self._in_front_of, ground.Ground) or
-                isinstance(self._in_front_of, road.Road) and self._in_front_of.is_locked) and \
-                    self._car_pos.n_lanes.get(new_current_direction) > 0:
-                # If lock was met and possible to consider turn_around
-                reward += constants.rewards.positive_turn_around
 
             if self._car_pos.n_lanes.get(new_current_direction) == 0:
                 # No opposite lanes available
@@ -371,7 +384,11 @@ class State:
 
         new_destination_coordinates = self.destination_coordinates
 
-        reward = rewards.basic_change_lane
+        reward = rewards.left_change_lane
+
+        if self.get_approx_dir() not in constants.close[self.current_direction]:
+            reward += rewards.forward_not_in_correct_direction
+            # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
         is_done = False
         if isinstance(self._in_front_of, road.Road):
             # On road
@@ -407,7 +424,8 @@ class State:
 
         if isinstance(self._car_pos, intersection.Intersection):
             if isinstance(self._in_front_of, ground.Ground) or \
-                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(self.current_direction) == 0:
+                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(
+                self.current_direction) == 0:
                 new_current_lane = None
                 reward += rewards.out_of_road
                 is_done = True
@@ -448,7 +466,11 @@ class State:
 
         new_destination_coordinates = self.destination_coordinates
 
-        reward = rewards.basic_change_lane
+        reward = rewards.right_change_lane
+
+        if self.get_approx_dir() not in constants.close[self.current_direction]:
+            reward += rewards.forward_not_in_correct_direction
+            # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
         is_done = False
         if isinstance(self._in_front_of, road.Road):
             # Happens on road
@@ -479,7 +501,8 @@ class State:
 
         if isinstance(self._car_pos, intersection.Intersection):
             if isinstance(self._in_front_of, ground.Ground) or \
-                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(self.current_direction) == 0:
+                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(
+                self.current_direction) == 0:
                 new_current_lane = None
                 reward += rewards.out_of_road
                 is_done = True
@@ -578,6 +601,41 @@ class State:
 
         return TransitionState(self.current_direction, approx_dir, is_forward_available,
                                is_left_available, is_right_available, lane_type)
+
+    def get_approx_dir(self):
+        Vector = namedtuple('Vector', ('axis0', 'axis1'))
+        vec = Vector(self.destination_coordinates.axis0 - self.car_coordinates.axis0,
+                     self.destination_coordinates.axis1 - self.car_coordinates.axis1)
+        # print(vec)
+
+        # Approximate direction preprocessing
+        if math.isclose(vec.axis1, 0.0):
+            alpha = 90 if vec.axis0 >= 0 else 270
+        elif math.isclose(vec.axis0, 0.0):
+            alpha = 0 if vec.axis1 >= 0 else 180
+        else:
+            tg_alpha = vec.axis0 / vec.axis1
+            # print(f"{tg_alpha = }")
+
+            alpha = math.degrees(math.atan(tg_alpha))
+
+            if alpha < 0:
+                alpha += 360
+            if vec.axis0 < 0 and vec.axis1 < 0:
+                alpha += 180
+            if vec.axis0 > 0 and vec.axis1 < 0:
+                alpha -= 180
+
+        # print(f"{alpha = }")
+        for angle in np.arange(22.5, 292.6, 45):
+            # print(angle)
+            if angle <= alpha < angle + 45:
+                approx_dir = constants.cardinal_directions[int(angle // 45)]
+                break
+        else:
+            approx_dir = cardinal_directions[-1]
+
+        return approx_dir
 
     @deprecated("Debug method. Use __str__ instead.")
     def visualize(self):
