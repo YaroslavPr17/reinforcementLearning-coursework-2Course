@@ -225,6 +225,11 @@ class State:
             if self._car_pos.n_lanes.get(new_current_direction) == 0:
                 reward += rewards.tricky_turn
                 is_done = True
+
+            if self.get_approx_dir() in constants.closest[new_current_direction]:
+                print(new_current_direction, self.get_approx_dir())
+                reward += rewards.turn_to_appropriate_direction
+
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
             if new_current_lane != 0:
                 new_current_lane -= 1
@@ -271,6 +276,10 @@ class State:
             if self._car_pos.n_lanes.get(new_current_direction) == 0:
                 reward += rewards.tricky_turn
                 is_done = True
+            if self.get_approx_dir() in constants.closest[new_current_direction]:
+                print(new_current_direction, self.get_approx_dir())
+                reward += rewards.turn_to_appropriate_direction
+
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
             if new_current_lane != 0:
                 new_current_lane = 0
@@ -283,6 +292,7 @@ class State:
                 reward += rewards.turn_from_the_appropriate_lane
             else:
                 reward += rewards.wrong_lane_to_turn
+
         else:
             raise ValueError('While turning_right. Cannot interpret current cell type.')
 
@@ -501,8 +511,8 @@ class State:
 
         if isinstance(self._car_pos, intersection.Intersection):
             if isinstance(self._in_front_of, ground.Ground) or \
-                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(
-                self.current_direction) == 0:
+                    isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get \
+                        (self.current_direction) == 0:
                 new_current_lane = None
                 reward += rewards.out_of_road
                 is_done = True
@@ -525,6 +535,14 @@ class State:
                      new_current_lane, new_observation), reward, is_done
 
     def to_transition_state(self):
+        """
+        Translates particular state into the transition state, emphasising specific traits of current state.
+
+        Returns
+        -------
+        TransitionState
+        """
+
         Vector = namedtuple('Vector', ('axis0', 'axis1'))
         vec = Vector(self.destination_coordinates.axis0 - self.car_coordinates.axis0,
                      self.destination_coordinates.axis1 - self.car_coordinates.axis1)

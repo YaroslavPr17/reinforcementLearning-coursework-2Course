@@ -155,10 +155,6 @@ class Agent:
                     action = np.argmax(self.q_table[self.state])
                 else:
                     action = list(np.argmax(self.q_table[self.state]))[0]
-                # if np.random.uniform(0, 1) < 0.999:
-                #     action = np.argmax(self.q_table[self.state])
-                # else:
-                #     action = np.random.choice(np.argpartition(self.q_table[self.state], -2)[-2:])
 
                 print('action =', action)
 
@@ -177,22 +173,51 @@ class Agent:
             print(f"Episode {episode}: {sum_reward = }\n\n")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
 
-    def reset(self):
+    def reset(self) -> None:
+        """
+        Resets current agent to initial state with no knowledge about environment.
+        """
         self.state = self.env.reset()
         self.q_table: dict[State, dict[int, int]] = \
             {state: [0 for _ in range(len(actions))] for state in self.env.states}
         self.last_action = None
         self.visited_states = set()
 
-    def load_q_table_from_file(self, filename: str):
+    def load_q_table_from_file(self, filename: str) -> None:
+        """
+        Loads existing q_table from given file to agent's field.
+
+        Parameters
+        ----------
+        filename : str,
+            The file from which q_table will be read.
+        """
+
         with open('learning_data\\' + filename, 'rb') as q_file:
             self.q_table = pickle.load(q_file)
 
     def write_q_table_to_file(self, filename: str):
+        """
+        Creates a dump of q_values to the file of given name.
+
+        Parameters
+        ----------
+        filename : str,
+            The filename where q_values will be stored.
+        """
+
         with open('learning_data\\' + filename, 'wb') as q_file:
             pickle.dump(self.q_table, q_file)
 
-    def compress_q_table(self, strategy: str = 'max') -> dict:
+    def compress_q_table(self) -> dict:
+        """
+        Performs mapping of existing states on transition states to reach great behavior on numerous maps.
+
+        Returns
+        -------
+        The dictionary containing transition states and "q_values" for them.
+        """
+
         compressed_q_table: dict = dict()
         for state in self.q_table.keys():
             compressed_q_table[state.to_transition_state()]: list = list()
@@ -200,41 +225,28 @@ class Agent:
             compressed_q_table[state.to_transition_state()].append(self.q_table[state])
 
         for transition_state in compressed_q_table.keys():
-            q_pool_for_all_actions = np.array(compressed_q_table[transition_state])
-            generalized_q_values = []
-            if strategy == 'random':
-                generalized_q_values = q_pool_for_all_actions[np.random.randint(0, q_pool_for_all_actions.shape[0])]
-            elif strategy == 'smart':
-                q = q_pool_for_all_actions
-                most_popular_actions = np.apply_along_axis(np.argmax, 1, q)
-                action = np.argmax(np.bincount(most_popular_actions))
-                generalized_q_values = [0] * self.env.n_actions
-                generalized_q_values[action] = 1
-            else:
-                for n_a in range(self.env.n_actions):
-                    q_values = q_pool_for_all_actions[:, n_a]
-                    q_values = q_values[q_values != MIN_REWARD]
-                    if q_values.size == 0:
-                        q_value = MIN_REWARD
-                    else:
-                        if strategy == 'max':
-                            q_value = np.max(q_values)
-                        elif strategy == 'mean':
-                            q_value = np.mean(q_values)
-                        elif strategy == 'min':
-                            q_value = np.min(q_values)
-                        else:
-                            raise ValueError('Wrong strategy to compress q_table')
-                    generalized_q_values.append(q_value)
+            print('\n', transition_state)
+            q = np.array(compressed_q_table[transition_state])
+            most_popular_actions = np.apply_along_axis(np.argmax, 1, q)
+            print(most_popular_actions)
+            generalized_q_values = np.bincount(most_popular_actions)
             compressed_q_table[transition_state] = generalized_q_values
         return compressed_q_table
 
-    def extract_q_table(self, compressed_q_table: dict):
+    def extract_q_table(self, compressed_q_table: dict) -> None:
+        """
+        Extracts q_table from given compressed q_table and writes the result into agent's field.
+
+        Parameters
+        ----------
+        compressed_q_table: dict
+        """
+
         for state in self.q_table.keys():
             try:
                 self.q_table[state] = compressed_q_table[state.to_transition_state()]
             except KeyError:
-                self.q_table[state] = [0] * self.env.n_actions
+                self.q_table[state] = [MIN_REWARD] * self.env.n_actions
 
     @staticmethod
     def load_compressed_q_table_from_file(filename: str) -> dict:
@@ -243,11 +255,14 @@ class Agent:
         return compressed_q_table
 
     @staticmethod
-    def write_compressed_q_table_to_file(filename: str, compressed_q_table: dict):
+    def write_compressed_q_table_to_file(filename: str, compressed_q_table: dict) -> None:
         with open('learning_data\\' + filename, 'wb') as q_file:
             pickle.dump(compressed_q_table, q_file)
 
-    def finalize(self):
+    def finalize(self) -> None:
+        """
+        Deletes states which remained unvisited during training process and marks undone actions as the most undesirable.
+        """
         states_to_delete = []
         for state in self.q_table.keys():
             if all(map(lambda t: t == 0, self.q_table[state])):

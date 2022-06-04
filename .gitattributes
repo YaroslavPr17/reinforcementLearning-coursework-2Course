@@ -1,0 +1,2 @@
+city/q_data_* filter=lfs diff=lfs merge=lfs -text
+q_data_* filter=lfs diff=lfs merge=lfs -text

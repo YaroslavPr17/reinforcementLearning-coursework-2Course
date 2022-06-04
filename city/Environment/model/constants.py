@@ -34,6 +34,7 @@ Rewards = namedtuple('Rewards', (
     'wrong_lane_to_turn',
     'basic_turn_around',
     'turn_around_on_intersection',
+    'turn_to_appropriate_direction',
     'turn_around_on_road',
     'positive_turn_around',
     'basic_left_right',
@@ -48,7 +49,7 @@ rewards = Rewards(
     visited_state=0,
     repeated_left_right=-10000,
     solid_line_crossing=-10000,
-    out_of_road=-9000,
+    out_of_road=-30000,
     turn_on_road=-8000,
     stop_in_the_middle_road=-5000,
     change_lane_not_on_road=0,
@@ -60,15 +61,17 @@ rewards = Rewards(
     basic_left_right=-325,
     turn_from_the_appropriate_lane=90,
     tricky_turn=-57000,
+    turn_to_appropriate_direction=8000,
+
 
     basic_forward=-300,
     forward_not_in_correct_direction=-75,
 
-    turn_around_through_solid_line=-2500,
+    turn_around_through_solid_line=-4500,
     turn_around_on_intersection=-700,
     turn_around_on_road=-1000,
-    basic_turn_around=-2000,
-    positive_turn_around=1900,
+    basic_turn_around=-6000,
+    positive_turn_around=5900,
 
     reached_destination=100000
 )
@@ -78,3 +81,9 @@ close['N'] = ('W', 'NW', 'N', 'NE', 'E')
 close['W'] = ('W', 'NW', 'N', 'SW', 'S')
 close['E'] = ('S', 'SE', 'N', 'NE', 'E')
 close['S'] = ('W', 'SW', 'S', 'SE', 'E')
+
+closest = dict()
+closest['N'] = ('NW', 'N', 'NE')
+closest['W'] = ('W', 'NW', 'SW')
+closest['E'] = ('SE', 'NE', 'E')
+closest['S'] = ('SW', 'S', 'SE')
