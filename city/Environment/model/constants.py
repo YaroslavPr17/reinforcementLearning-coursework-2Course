@@ -22,6 +22,7 @@ cardinal_directions = ('SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E')
 oriented_directions = {'v': 'NS', 'h': 'WE'}
 
 Rewards = namedtuple('Rewards', (
+    'tricky_turn',
     'visited_state',
     'repeated_left_right',
     'solid_line_crossing',
@@ -33,31 +34,56 @@ Rewards = namedtuple('Rewards', (
     'wrong_lane_to_turn',
     'basic_turn_around',
     'turn_around_on_intersection',
+    'turn_to_appropriate_direction',
     'turn_around_on_road',
     'positive_turn_around',
     'basic_left_right',
-    'basic_change_lane',
+    'left_change_lane',
+    'right_change_lane',
     'basic_forward',
+    'forward_not_in_correct_direction',
     'turn_from_the_appropriate_lane',
     'reached_destination'
 ))
 rewards = Rewards(
-    visited_state=-200000,
-    repeated_left_right=-70000,
-    solid_line_crossing=-60000,
-    out_of_road=-40000,
-    turn_around_through_solid_line=-4000,
-    turn_on_road=-40000,
-    stop_in_the_middle_road=-20000,
-    change_lane_not_on_road=-10000,
-    wrong_lane_to_turn=-3000,
-    basic_turn_around=-32000,
-    turn_around_on_intersection=-3000,
-    turn_around_on_road=-8000,
-    positive_turn_around=+10000,
-    basic_left_right=+100,
-    basic_change_lane=-1500,
-    basic_forward=+2500,
-    turn_from_the_appropriate_lane=+5000,
-    reached_destination=+100000
+    visited_state=0,
+    repeated_left_right=-10000,
+    solid_line_crossing=-10000,
+    out_of_road=-30000,
+    turn_on_road=-8000,
+    stop_in_the_middle_road=-5000,
+    change_lane_not_on_road=0,
+
+    left_change_lane=-500,
+    right_change_lane=-400,
+
+    wrong_lane_to_turn=-200,
+    basic_left_right=-325,
+    turn_from_the_appropriate_lane=90,
+    tricky_turn=-57000,
+    turn_to_appropriate_direction=8000,
+
+
+    basic_forward=-300,
+    forward_not_in_correct_direction=-75,
+
+    turn_around_through_solid_line=-4500,
+    turn_around_on_intersection=-700,
+    turn_around_on_road=-1000,
+    basic_turn_around=-6000,
+    positive_turn_around=5900,
+
+    reached_destination=100000
 )
+
+close = dict()
+close['N'] = ('W', 'NW', 'N', 'NE', 'E')
+close['W'] = ('W', 'NW', 'N', 'SW', 'S')
+close['E'] = ('S', 'SE', 'N', 'NE', 'E')
+close['S'] = ('W', 'SW', 'S', 'SE', 'E')
+
+closest = dict()
+closest['N'] = ('NW', 'N', 'NE')
+closest['W'] = ('W', 'NW', 'SW')
+closest['E'] = ('SE', 'NE', 'E')
+closest['S'] = ('SW', 'S', 'SE')

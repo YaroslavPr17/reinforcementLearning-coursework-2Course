@@ -3,15 +3,42 @@ from collections import namedtuple
 
 
 class TransitionState:
+    """
+    The class describes transition state to generalize all possible general states for other maps.
+
+    Parameters
+    ----------
+    current_direction: str,
+        The capital letter, corresponding to one of cardinal directions.
+            - 'N' - North
+            - 'S' - South
+            - 'W' - West
+            - 'E' - East
+
+    approximate_direction: str,
+        One of 8 possible directions to define the approximate direction of agent's destination point.
+            'N', 'W', 'E', 'S', 'NE', 'NW', 'SE', 'SW'
+
+    forward_available: bool,
+        The flag describing whether moving forward is possible.
+
+    left_available: bool,
+        The flag describing whether turning left is possible.
+
+    right_available: bool,
+        The flag describing whether turning right is possible.
+
+    lane_type: LaneInfo,
+        The object which determines the type of lane, which agent is standing on.
+    """
+
     def __init__(self,
                  current_direction: str,
                  approximate_direction: str,
                  forward_available: bool,
                  left_available: bool,
                  right_available: bool,
-                 lane_type: namedtuple('LaneInfo', 'is_left is_right'),
-                 # is_on_road: bool,
-                 # is_towards_intersection: bool,
+                 lane_type: namedtuple('LaneInfo', 'is_left is_right')
                  ):
         self.current_direction = current_direction
         self.approximate_direction = approximate_direction
@@ -19,7 +46,6 @@ class TransitionState:
         self.left_available = left_available
         self.right_available = right_available
         self.lane_type = lane_type
-
 
     def __eq__(self, other):
         return self.current_direction == other.current_direction and \
