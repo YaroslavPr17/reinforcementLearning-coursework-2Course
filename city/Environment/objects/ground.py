@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:64779ca82b7628f60ae699dbf5e1bb0790ab5a71a8568cb19a858a023b4f0eb3
-size 333
+from Environment.objects.model_object import Object
+
+
+class Ground(Object):
+    def __init__(self):
+        super().__init__()
+        self.label = 'G'
+
+    def __str__(self):
+        return f"{self.label}()".ljust(Ground.slots)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __copy__(self):
+        return Ground()

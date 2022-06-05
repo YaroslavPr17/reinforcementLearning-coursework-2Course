@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:aad86fbc82963007a86f33e5db8d40c9a1a1911e2d27667c5ae325e15e4e337c
-size 680
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N802" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="city.City" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
