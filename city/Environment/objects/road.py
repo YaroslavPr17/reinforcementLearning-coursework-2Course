@@ -66,15 +66,15 @@ class Road(Object):
 
     def __str__(self):
         out = f"{self.label}" \
-              f"({self.orientation}"
+              f"("
         if self.orientation == 'v':
             out += f"{self.lanes['S']}{'|'}{self.lanes['N']}"
             # out += '_' * len(self.lanes['S']) + '|' + '_' * len(self.lanes['N'])
         else:
             out += f"{self.lanes['W']}{'|'}{self.lanes['E']}"
             # out += '_' * len(self.lanes['W']) + '|' + '_' * len(self.lanes['E'])
-        out += f"{self.hard_marking}" \
-               f"{self.soft_marking})"
+        # out += f"{self.hard_marking}" \
+        #        f"{self.soft_marking})"
 
         return out.ljust(Road.slots)
 
@@ -110,6 +110,7 @@ class Road(Object):
 
         if lane_num is None or 0 <= lane_num <= self.n_lanes.get(direction) - 1:
             return True
+        return False
 
 
 

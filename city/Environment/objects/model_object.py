@@ -1,5 +1,5 @@
 class Object:
-    slots = 34
+    slots = 20
 
     def __init__(self):
         pass

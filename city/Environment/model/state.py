@@ -139,8 +139,8 @@ class State:
 
         reward = rewards.basic_forward
 
-        if self.get_approx_dir() not in constants.close[self.current_direction]:
-            reward += rewards.forward_not_in_correct_direction
+        if self.get_approx_dir() in constants.closest[self.current_direction]:
+            reward += rewards.forward_in_correct_direction
             # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
         is_done = False
         if isinstance(self._in_front_of, ground.Ground):
@@ -193,6 +193,8 @@ class State:
 
             if new_current_lane != 0:
                 reward += constants.rewards.stop_in_the_middle_road
+            else:
+                reward += rewards.correct_stop
 
         new_observation = city.get_observation(self.city_model, new_current_direction, new_car_coordinates,
                                                normalize=True)
@@ -217,7 +219,7 @@ class State:
         if isinstance(self._car_pos, road.Road):
             # Unexpected turn outside the intersection
             new_current_lane = None
-            reward += constants.rewards.turn_on_road
+            reward += rewards.turn_on_road
             is_done = True
 
         elif isinstance(self._car_pos, intersection.Intersection):
@@ -227,7 +229,7 @@ class State:
                 is_done = True
 
             if self.get_approx_dir() in constants.closest[new_current_direction]:
-                print(new_current_direction, self.get_approx_dir())
+                # print(new_current_direction, self.get_approx_dir())
                 reward += rewards.turn_to_appropriate_direction
 
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
@@ -277,7 +279,7 @@ class State:
                 reward += rewards.tricky_turn
                 is_done = True
             if self.get_approx_dir() in constants.closest[new_current_direction]:
-                print(new_current_direction, self.get_approx_dir())
+                # print(new_current_direction, self.get_approx_dir())
                 reward += rewards.turn_to_appropriate_direction
 
             new_current_lane = self._car_pos.n_lanes.get(new_current_direction)
@@ -318,8 +320,20 @@ class State:
         is_done = False
         if isinstance(self._car_pos, intersection.Intersection):
             # When intersection, cannot define lane
-            reward += constants.rewards.turn_around_on_intersection
-            new_current_lane = None
+            reward += rewards.turn_around_on_intersection
+
+            if self._car_pos.n_lanes.get(new_current_direction) > 0:
+                new_current_lane = self._car_pos.n_lanes.get(new_current_direction) - 1
+            else:
+                new_current_lane = None
+
+            if self.current_lane is None:
+                pass
+            elif self.current_lane != self._car_pos.n_lanes.get(self.current_direction) - 1:
+                # Current lane is not left
+                reward += rewards.wrong_lane_to_turn
+            else:
+                reward += rewards.turn_from_the_appropriate_lane
 
             if (isinstance(self._in_front_of, ground.Ground) or
                 isinstance(self._in_front_of, road.Road) and self._in_front_of.n_lanes.get(
@@ -396,8 +410,8 @@ class State:
 
         reward = rewards.left_change_lane
 
-        if self.get_approx_dir() not in constants.close[self.current_direction]:
-            reward += rewards.forward_not_in_correct_direction
+        if self.get_approx_dir() in constants.closest[self.current_direction]:
+            reward += rewards.forward_in_correct_direction
             # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
         is_done = False
         if isinstance(self._in_front_of, road.Road):
@@ -423,10 +437,18 @@ class State:
             else:
                 new_current_lane = None
                 reward += rewards.out_of_road
+                reward += rewards.solid_line_crossing
                 is_done = True
         elif isinstance(self._in_front_of, intersection.Intersection):
-            new_current_lane = None
             reward += rewards.change_lane_not_on_road
+            if self.current_lane is None:
+                new_current_lane = None
+            elif self.current_lane == self._car_pos.n_lanes.get(self.current_direction) - 1:
+                new_current_lane = None
+                reward += rewards.out_of_road
+                is_done = True
+            else:
+                new_current_lane = self.current_lane + 1
         else:
             new_current_lane = None
             reward += rewards.change_lane_not_on_road
@@ -450,6 +472,8 @@ class State:
 
             if new_current_lane != 0:
                 reward += constants.rewards.stop_in_the_middle_road
+            else:
+                reward += rewards.correct_stop
 
         new_observation = city.get_observation(self.city_model, new_current_direction, new_car_coordinates,
                                                normalize=True)
@@ -478,32 +502,33 @@ class State:
 
         reward = rewards.right_change_lane
 
-        if self.get_approx_dir() not in constants.close[self.current_direction]:
-            reward += rewards.forward_not_in_correct_direction
-            # print('c_d =', self.current_direction, 'a_d =', self.get_approx_dir())
+        if self.get_approx_dir() in constants.closest[self.current_direction]:
+            reward += rewards.forward_in_correct_direction
         is_done = False
         if isinstance(self._in_front_of, road.Road):
             # Happens on road
-            if self._in_front_of.is_lane_valid(new_current_direction, self.current_lane):
-                # Current lane forward is available
-                if self.current_lane is None or self._in_front_of.is_lane_valid(new_current_direction,
-                                                                                self.current_lane - 1):
-                    # Right lane forward is available
-                    if self.current_lane is None:
-                        new_current_lane = None
-                    else:
-                        new_current_lane = self.current_lane - 1
-                else:
+            if self.current_lane is None or self._in_front_of.is_lane_valid(new_current_direction,
+                                                                            self.current_lane - 1):
+                # Right lane forward is available
+                if self.current_lane is None:
                     new_current_lane = None
-                    reward += rewards.out_of_road
-                    is_done = True
+                else:
+                    new_current_lane = self.current_lane - 1
             else:
                 new_current_lane = None
                 reward += rewards.out_of_road
                 is_done = True
         elif isinstance(self._in_front_of, intersection.Intersection):
-            new_current_lane = None
             reward += rewards.change_lane_not_on_road
+            if self.current_lane is None:
+                new_current_lane = None
+            elif self.current_lane == 0:
+                new_current_lane = None
+                reward += rewards.out_of_road
+                is_done = True
+            else:
+                new_current_lane = self.current_lane - 1
+
         else:
             new_current_lane = None
             reward += rewards.change_lane_not_on_road
@@ -523,10 +548,12 @@ class State:
         if new_car_coordinates.axis0 == new_destination_coordinates.axis0 and \
                 new_car_coordinates.axis1 == new_destination_coordinates.axis1:
             is_done = True
-            reward += constants.rewards.reached_destination
+            reward += rewards.reached_destination
 
             if new_current_lane != 0:
-                reward += constants.rewards.stop_in_the_middle_road
+                reward += rewards.stop_in_the_middle_road
+            else:
+                reward += rewards.correct_stop
 
         new_observation = city.get_observation(self.city_model, new_current_direction, new_car_coordinates,
                                                normalize=True)
@@ -617,8 +644,17 @@ class State:
         else:
             is_right_available = False
 
+        # is_no_lane_towards
+        if isinstance(self._in_front_of, road.Road) and \
+                self._in_front_of.n_lanes.get(self.current_direction) < self._car_pos.n_lanes.get(
+            self.current_direction) and \
+                self.current_lane == self._car_pos.n_lanes.get(self.current_direction) - 1:
+            no_lane_towards = True
+        else:
+            no_lane_towards = False
+
         return TransitionState(self.current_direction, approx_dir, is_forward_available,
-                               is_left_available, is_right_available, lane_type)
+                               is_left_available, is_right_available, lane_type, no_lane_towards)
 
     def get_approx_dir(self):
         Vector = namedtuple('Vector', ('axis0', 'axis1'))

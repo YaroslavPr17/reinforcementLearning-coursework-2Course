@@ -22,6 +22,7 @@ cardinal_directions = ('SE', 'S', 'SW', 'W', 'NW', 'N', 'NE', 'E')
 oriented_directions = {'v': 'NS', 'h': 'WE'}
 
 Rewards = namedtuple('Rewards', (
+    'correct_stop',
     'tricky_turn',
     'visited_state',
     'repeated_left_right',
@@ -41,37 +42,38 @@ Rewards = namedtuple('Rewards', (
     'left_change_lane',
     'right_change_lane',
     'basic_forward',
-    'forward_not_in_correct_direction',
+    'forward_in_correct_direction',
     'turn_from_the_appropriate_lane',
     'reached_destination'
 ))
 rewards = Rewards(
     visited_state=0,
     repeated_left_right=-10000,
-    solid_line_crossing=-10000,
-    out_of_road=-30000,
-    turn_on_road=-8000,
-    stop_in_the_middle_road=-5000,
+    solid_line_crossing=-20000,
+    out_of_road=-50000,
+    turn_on_road=-30000,
+    stop_in_the_middle_road=-10000,
     change_lane_not_on_road=0,
+    correct_stop=+5000,
 
-    left_change_lane=-500,
-    right_change_lane=-400,
+    left_change_lane=-300,
+    right_change_lane=-140,
 
     wrong_lane_to_turn=-200,
-    basic_left_right=-325,
-    turn_from_the_appropriate_lane=90,
-    tricky_turn=-57000,
-    turn_to_appropriate_direction=8000,
+    basic_left_right=-6525,
+    turn_from_the_appropriate_lane=+590,
+    tricky_turn=-20000,
+    turn_to_appropriate_direction=500,
 
 
-    basic_forward=-300,
-    forward_not_in_correct_direction=-75,
+    basic_forward=-250,
+    forward_in_correct_direction=+260,
 
-    turn_around_through_solid_line=-4500,
+    turn_around_through_solid_line=-25500,
     turn_around_on_intersection=-700,
-    turn_around_on_road=-1000,
-    basic_turn_around=-6000,
-    positive_turn_around=5900,
+    turn_around_on_road=-8000,
+    basic_turn_around=-10000,
+    positive_turn_around=9500,
 
     reached_destination=100000
 )

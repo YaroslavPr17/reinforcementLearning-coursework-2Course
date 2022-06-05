@@ -7,8 +7,6 @@ from itertools import product
 from tqdm import tqdm
 import os
 
-from gym.spaces.discrete import Discrete
-
 from Environment.objects.ground import Ground
 from Environment.objects.intersection import Intersection
 from Environment.objects.model_object import Object
@@ -31,7 +29,6 @@ def get_observation(city_model: list, direction: str, car_coord: CarCoord, norma
                 o.append(city_model[a0][a1])
         obs = np.array(o).reshape(2, 3)
     elif direction == 'S':
-        # print(axis0, axis1)
         for a0 in range(axis0, axis0 + 2):
             for a1 in range(axis1 - 1, axis1 + 2):
                 if isinstance(city_model[a0][a1], Road):
@@ -67,8 +64,7 @@ class City:
 
     np.random.seed(123)
 
-    def __init__(self, map_sample: int = 0, layout_sample: int = 0, narrowing_and_expansion: bool = True,
-                 pedestrian_crossings: bool = True, traffic_lights: bool = True):
+    def __init__(self, map_sample: int = 0, layout_sample: int = 0, narrowing_and_expansion: bool = True):
 
         from Environment.raw_data.roads_descriptor import roads_desc
 
@@ -103,14 +99,9 @@ class City:
 
         self.print_model_to_file(map_name[0:-4] + 'model.txt')
 
-        # n_states = 0
-        self.n_actions = len(constants.actions)
-        self.action_space = [a for a in range(self.n_actions)]
-
         self.P = dict()
         self.states = []
 
-        # print(f"{len(self.road_cells + list(map(tuple, self.intersections.astype(tuple))))}")
         for car_road_cell in tqdm(self.road_cells + list(map(tuple, self.intersections.astype(tuple))), file=sys.stdout):
 
             _road: Union[Road, list[Object]] = self.city_model[car_road_cell[0]][car_road_cell[1]]
@@ -152,15 +143,16 @@ class City:
 
                             if state not in self.P.keys():
                                 self.P[state] = dict()
-                                # n_states += 1
                                 self.states.append(state)
                             self.P[state][action] = (new_state, reward, is_done)
 
         print('Transition dictionary was built.')
+        print(f'{sys.getsizeof(self.states) = }')
+        print(f'{sys.getsizeof(self.P) = }')
 
-        # self.n_states = n_states
-        self.state = None
-        self.learning_state = None
+        self.n_states = len(self.P.keys())
+        self.n_actions = len(constants.actions)
+        self.action_space = [a for a in range(self.n_actions)]
 
     @property
     def all_observations(self):
@@ -299,8 +291,6 @@ class City:
                 local_intersection.n_in_lanes['E'] = right_obj.n_lanes.get('W')
             if isinstance(down_obj, Road):
                 local_intersection.n_in_lanes['S'] = down_obj.n_lanes.get('N')
-
-
 
     def print_model_to_file(self, filename: str):
         with open(Path('Environment', filename), 'w', encoding='UTF-8') as new_map_file:

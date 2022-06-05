@@ -38,7 +38,8 @@ class TransitionState:
                  forward_available: bool,
                  left_available: bool,
                  right_available: bool,
-                 lane_type: namedtuple('LaneInfo', 'is_left is_right')
+                 lane_type: namedtuple('LaneInfo', 'is_left is_right'),
+                 no_lane_towards: bool
                  ):
         self.current_direction = current_direction
         self.approximate_direction = approximate_direction
@@ -46,6 +47,7 @@ class TransitionState:
         self.left_available = left_available
         self.right_available = right_available
         self.lane_type = lane_type
+        self.no_lane_towards = no_lane_towards
 
     def __eq__(self, other):
         return self.current_direction == other.current_direction and \
@@ -53,11 +55,12 @@ class TransitionState:
             self.forward_available == other.forward_available and \
             self.left_available == other.left_available and \
             self.right_available == other.right_available and \
-            self.lane_type == other.lane_type
+            self.lane_type == other.lane_type and \
+            self.no_lane_towards == other.no_lane_towards
 
     def __hash__(self):
         return hash((self.current_direction, self.approximate_direction, self.forward_available,
-                     self.left_available, self.right_available, self.lane_type))
+                     self.left_available, self.right_available, self.lane_type, self.no_lane_towards))
 
     def __str__(self):
         return f"{self.current_direction}\n" \
@@ -65,7 +68,8 @@ class TransitionState:
                f"{self.forward_available}\n" \
                f"{self.left_available}\n" \
                f"{self.right_available}\n" \
-               f"{self.lane_type}\n\n"
+               f"{self.lane_type}\n" \
+               f"{self.no_lane_towards}\n\n"
 
     def __repr__(self):
         return self.__str__()

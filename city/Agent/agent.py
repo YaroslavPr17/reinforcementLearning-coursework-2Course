@@ -1,12 +1,16 @@
-import dill as pickle
 import sys
+
+import dill as pickle
+from tqdm import tqdm
+from pathlib import Path
 
 from Environment.city import City
 from Environment.model.utils import *
 from Environment.model.constants import *
 from Environment.model.state import State
 
-import numpy as np
+data_filename = 'compressed_q_table'
+path_to_learning_data = Path('learning_data', data_filename)
 
 
 class Agent:
@@ -37,11 +41,9 @@ class Agent:
 
     def __init__(self, map_sample: int = 0, layout_sample: int = 0):
         self.env = City(map_sample, layout_sample)
+        self.q_table: dict[State, list[int]] = \
+            {state: [0 for _ in range(len(actions))] for state in self.env.P.keys()}
         self.state = self.env.reset()
-        self.q_table: dict[State, list[int, int]] = \
-            {state: [0 for _ in range(len(actions))] for state in self.env.states}
-        self.last_action = None
-        self.visited_states = set()
 
     def train(self, n_episodes: int = 100, alpha: float = 0.7, gamma: float = 0.7, epsilon: float = 0.8) -> None:
         """
@@ -71,13 +73,10 @@ class Agent:
         -------
         None - since the Agent's attribute is changed.
         """
-        for episode in range(n_episodes):
+        for episode in tqdm(range(n_episodes), file=sys.stdout):
             self.state = self.env.reset()
 
             is_done = False
-
-            self.last_action = None
-            self.visited_states = set()
 
             sum_reward = 0
 
@@ -98,24 +97,6 @@ class Agent:
 
                 next_state: State
                 next_state, reward, is_done = self.env.step(action)
-
-                # print(self.state)
-                _data = (next_state.current_direction, next_state.car_coordinates)
-                if _data in self.visited_states:
-                    reward += rewards.visited_state
-                    is_done = True
-                    # print("ALREADY VISITED!", file=sys.stderr)
-                else:
-                    self.visited_states.add(_data)
-
-                if self.last_action is not None and \
-                        (self.last_action == actions.LEFT and action == actions.LEFT or
-                         self.last_action == actions.RIGHT and action == actions.RIGHT or
-                         self.last_action == actions.LEFT and action == actions.RIGHT or
-                         self.last_action == actions.RIGHT and action == actions.LEFT):
-                    reward += rewards.repeated_left_right
-
-                self.last_action = action
 
                 old_value = self.q_table[self.state][action]
 
@@ -145,7 +126,6 @@ class Agent:
             self.state = self.env.reset()
             print('INITIAL STATE:\n', self.state)
 
-
             is_done = False
 
             sum_reward = 0
@@ -156,9 +136,11 @@ class Agent:
                 else:
                     action = list(np.argmax(self.q_table[self.state]))[0]
 
-                print('action =', action)
-
+                next_state: State
                 next_state, reward, is_done = self.env.step(action)
+
+                print(f'{action = }, lane = {next_state.current_lane}')
+                print(list(self.q_table[self.state]), end='\n\n')
 
                 if next_state.car_coordinates.axis0 == next_state.destination_coordinates.axis0 and \
                         next_state.car_coordinates.axis1 == next_state.destination_coordinates.axis1:
@@ -179,9 +161,7 @@ class Agent:
         """
         self.state = self.env.reset()
         self.q_table: dict[State, dict[int, int]] = \
-            {state: [0 for _ in range(len(actions))] for state in self.env.states}
-        self.last_action = None
-        self.visited_states = set()
+            {state: [0 for _ in range(len(actions))] for state in self.env.P.keys()}
 
     def load_q_table_from_file(self, filename: str) -> None:
         """
@@ -229,7 +209,7 @@ class Agent:
             q = np.array(compressed_q_table[transition_state])
             most_popular_actions = np.apply_along_axis(np.argmax, 1, q)
             print(most_popular_actions)
-            generalized_q_values = np.bincount(most_popular_actions)
+            generalized_q_values = np.bincount(most_popular_actions, minlength=self.env.n_actions)
             compressed_q_table[transition_state] = generalized_q_values
         return compressed_q_table
 
@@ -242,7 +222,7 @@ class Agent:
         compressed_q_table: dict
         """
 
-        for state in self.q_table.keys():
+        for state in tqdm(self.q_table.keys(), file=sys.stdout, desc='Q_table extraction progress'):
             try:
                 self.q_table[state] = compressed_q_table[state.to_transition_state()]
             except KeyError:
