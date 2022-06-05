@@ -1,3 +1,16 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:399ded020dc87dd9f9e8b296c31e52cbb5b2e1a73c4c091bfcd2fcfe7dd9c9d5
-size 647
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyChainedComparisonsInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoreConstantInTheMiddle" value="true" />
+    </inspection_tool>
+    <inspection_tool class="PyPep8Inspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="E201" />
+          <option value="W605" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>

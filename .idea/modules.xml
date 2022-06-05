@@ -1,3 +1,8 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:605e668e762e38a035fb87e1d2574430abdc6e979fefe591f2ee5239513a6254
-size 340
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Reinforcement-Learning_Coursework---2-course.iml" filepath="$PROJECT_DIR$/.idea/Reinforcement-Learning_Coursework---2-course.iml" />
+    </modules>
+  </component>
+</project>
