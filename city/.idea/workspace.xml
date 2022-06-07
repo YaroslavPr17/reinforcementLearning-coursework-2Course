@@ -5,17 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="985dc904-39bf-4c83-a543-dfbe27179149" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../.gitattributes" beforeDir="false" afterPath="$PROJECT_DIR$/../.gitattributes" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/Reinforcement-Learning_Coursework---2-course.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/Reinforcement-Learning_Coursework---2-course.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Useful links.docx" beforeDir="false" afterPath="$PROJECT_DIR$/../Useful links.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Useful links.md" beforeDir="false" afterPath="$PROJECT_DIR$/../Useful links.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Environment/map1model.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/map1model.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Environment/map2model.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/map2model.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/demo.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/env_vizualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/env_vizualization.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,9 +28,12 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
-  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "D:/GitHub_personal/Reinforcement-Learning_Coursework---2-course/city"
+  }
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\GitHub_personal\Reinforcement-Learning_Coursework---2-course\city\Visualization" />
@@ -174,6 +171,11 @@
       <workItem from="1653909717200" duration="1219000" />
       <workItem from="1653911363873" duration="285000" />
       <workItem from="1653911665064" duration="488000" />
+      <workItem from="1654457865401" duration="27000" />
+      <workItem from="1654531552979" duration="2915000" />
+      <workItem from="1654544488273" duration="1441000" />
+      <workItem from="1654575839445" duration="5168000" />
+      <workItem from="1654610729458" duration="61000" />
     </task>
     <servers />
   </component>
@@ -190,5 +192,8 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/city$env_vizualization__1_.coverage" NAME="env_vizualization (1) Coverage Results" MODIFIED="1654610750889" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
