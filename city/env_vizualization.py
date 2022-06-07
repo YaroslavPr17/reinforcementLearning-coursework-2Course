@@ -1,8 +1,12 @@
+import aggdraw
 from Environment.city import City
 from Environment.objects.road import Road
 from Environment.objects.intersection import Intersection
 import tkinter as tk
 from tkinter import Canvas
+from PIL import Image, ImageTk
+from PIL import Image, ImageColor
+from PIL import ImageDraw
 
 class MapVizualization(tk.Tk):
     x0 = 0
@@ -18,15 +22,17 @@ class MapVizualization(tk.Tk):
     horizontalWindow = 2560 // 3 * 2
     verticalWindow = 1440 // 3 * 2
 
-    vertical = verticalWindow // 15
-    horizontal = horizontalWindow // 20
+    def setBlockSize(self):
+        self.vertical = self.verticalWindow // self.city.shape[0]
+        self.horizontal = self.horizontalWindow // self.city.shape[1]
+        self.wp = self.vertical // 10 if self.vertical < self.horizontal else self.horizontal // 10
 
-    def drawContent(self, visible):
+    def drawContent(self):
         def drawRectangle(xLeft, yTop, xRight, yBottom, fillColor, lineColor):
-            self.canvas.create_rectangle(xLeft, yTop, xRight, yBottom, fill=fillColor, outline=lineColor)
+            draw.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen(fillColor, 0.5), aggdraw.Brush(fillColor))
 
         def drawGrass(x0, y0, x1, y1, x2, y2, x3, y3):
-            self.canvas.create_polygon(x0, y0, x1, y1, x2, y2, x3, y3, fill="green")
+            draw.polygon((x0, y0, x1, y1, x2, y2, x3, y3), aggdraw.Pen("#247719", 0.5),aggdraw.Brush("#247719"))
 
         def idxToX(idx):
             return idx * self.horizontal
@@ -49,11 +55,7 @@ class MapVizualization(tk.Tk):
             yTop = self.y0 + idxToY(verticalIdx) * self.scale
             yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
 
-            if visible:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "green", "green")
-            else:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "white", "white")
-                return
+            drawRectangle(xLeft, yTop, xRight, yBottom, "#247719", "#247719")
 
         def drawIntersection(horizontalIdx, verticalIdx):
             xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
@@ -61,11 +63,7 @@ class MapVizualization(tk.Tk):
             yTop = self.y0 + idxToY(verticalIdx) * self.scale
             yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
 
-            if visible:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "green", "green")
-            else:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "white", "white")
-                return
+            drawRectangle(xLeft, yTop, xRight, yBottom, "#247719", "#247719")
 
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
@@ -131,7 +129,7 @@ class MapVizualization(tk.Tk):
                       xLeftBottom, yLeftBottom,
                       xLeft, yLeftBottom]
 
-            self.canvas.create_polygon(points, fill="gray", outline="gray")
+            draw.polygon((points), aggdraw.Pen("gray", 0.5),aggdraw.Brush("gray"))
 
         def drawVerticalRoad(horizontalIdx, verticalIdx):
             xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
@@ -139,19 +137,15 @@ class MapVizualization(tk.Tk):
             yTop = self.y0 + idxToY(verticalIdx) * self.scale
             yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
 
-            if visible:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
-            else:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "white", "white")
-                return
+            drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
 
             xCenter = xLeft + (xRight - xLeft) // 2
 
             # рисуем центральную линию: двойная сполшная и т.д.
             # пунктирная линия - параметр dash=(15, 15)
             if (self.wp * self.scale > 5):
-                self.canvas.create_line(xCenter - 3, yTop, xCenter - 3, yBottom, width=2, fill="white")
-                self.canvas.create_line(xCenter + 3, yTop, xCenter + 3, yBottom, width=2, fill="white")
+                draw.line((xCenter - 1.3 * self.scale, yTop, xCenter - 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
+                draw.line((xCenter + 1.3 * self.scale, yTop, xCenter + 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
 
             # количество полос сверху
             leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
@@ -175,19 +169,15 @@ class MapVizualization(tk.Tk):
             yTop = self.y0 + idxToY(verticalIdx) * self.scale
             yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
 
-            if visible:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
-            else:
-                drawRectangle(xLeft, yTop, xRight, yBottom, "white", "white")
-                return
+            drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
 
             yCenter = yTop + (yBottom - yTop) // 2
 
             # рисуем центральную линию: двойная сполшная и т.д.
             # пунктирная линия - параметр dash=(15, 15)
             if (self.wp * self.scale > 5):
-                self.canvas.create_line(xLeft, yCenter - 3, xRight, yCenter - 3, width=2, fill="white")
-                self.canvas.create_line(xLeft, yCenter + 3, xRight, yCenter + 3, width=2, fill="white")
+                draw.line((xLeft, yCenter - 1.3 * self.scale, xRight, yCenter - 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
+                draw.line((xLeft, yCenter + 1.3 * self.scale, xRight, yCenter + 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
 
             # количество полос сверху
             leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
@@ -205,6 +195,9 @@ class MapVizualization(tk.Tk):
 
             drawGrass(xLeft, yLeftTopGrass, xLeft, yTop, xRight, yTop, xRight, yRightTopGrass)
             drawGrass(xLeft, yLeftBottomGrass, xLeft, yBottom, xRight, yBottom, xRight, yRightBottomGrass)
+
+        image = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (255,255,255,255))
+        draw = aggdraw.Draw(image)
 
         for i in range(self.city.shape[0]):
             for j in range(self.city.shape[1]):
@@ -226,8 +219,11 @@ class MapVizualization(tk.Tk):
                 else:
                     drawGround(j, i)
 
+        draw.flush()
+        self.tk_image = ImageTk.PhotoImage(image)
+        self.canvas.create_image((0, 0), anchor='nw' ,image=self.tk_image)
+
     def updateContent(self, x, y):
-        self.drawContent(False)
 
         newX0 = self.x0 + x - self.xMouse
         if(newX0 > 0):
@@ -243,8 +239,7 @@ class MapVizualization(tk.Tk):
 
         self.x0 = newX0
         self.y0 = newY0
-        #print(f"##x0 = {self.x0}, ##y0 = {self.y0}")
-        self.drawContent(True)
+        self.drawContent()
 
     def __init__(self):
         super().__init__()
@@ -254,32 +249,29 @@ class MapVizualization(tk.Tk):
         self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="white")
         self.canvas.pack(expand=1,fill=tk.BOTH)
 
+
         self.city = City(map_sample=1, layout_sample=0, narrowing_and_expansion=True)
         #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
-        self.vertical = self.verticalWindow // self.city.shape[0]
-        self.horizontal = self.horizontalWindow // self.city.shape[1]
-        self.wp = self.vertical // 10 if self.vertical < self.horizontal else self.horizontal // 10
 
-        self.drawContent(True)
+        self.setBlockSize()
+        self.drawContent()
 
         self.canvas.bind('<MouseWheel>', self.canvas_mouseWheel_event)
         self.canvas.bind('<Motion>', self.canvas_motion_event)
         self.canvas.bind('<ButtonPress-1>', self.canvas_buttonPress_event)
         self.canvas.bind('<ButtonRelease-1>', self.canvas_buttonRelease_event)
+        self.canvas.bind("<Configure>", self.canvas_resize_event)
 
-        self.canvas.pack()
 
     def canvas_mouseWheel_event(self, event):
         # respond to Linux or Windows wheel event
         if event.num == 5 or event.delta == -120:
             if self.scale > 1:
-                self.drawContent(False)
                 self.scale -= 0.1
-                self.drawContent(True)
+                self.drawContent()
         if event.num == 4 or event.delta == 120:
-            self.drawContent(False)
             self.scale += 0.1
-            self.drawContent(True)
+            self.drawContent()
         print('Scale: ', self.scale)
 
     def canvas_motion_event(self, event):
@@ -302,6 +294,11 @@ class MapVizualization(tk.Tk):
         self.moveMode = False
         self.updateContent(event.x, event.y)
         print('ButtonRelease: ', event.x, event.y)
+
+    def canvas_resize_event(self, event):
+        self.horizontalWindow, self.verticalWindow = event.width, event.height
+        self.setBlockSize()
+        self.drawContent()
 
 if __name__ == "__main__":
     mapVizualization = MapVizualization()
