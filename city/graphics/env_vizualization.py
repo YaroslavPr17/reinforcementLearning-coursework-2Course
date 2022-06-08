@@ -246,7 +246,7 @@ class MapVizualization(tk.Tk):
         self.y0 = newY0
         self.drawContent()
 
-    def __init__(self):
+    def __init__(self, env: City):
         super().__init__()
 
         self.title("env_visualization")
@@ -255,7 +255,7 @@ class MapVizualization(tk.Tk):
         self.canvas.pack(expand=1,fill=tk.BOTH)
 
 
-        self.city = City(map_sample=0, layout_sample=0, narrowing_and_expansion=True)
+        self.city = env
         #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
 
         self.setBlockSize()
@@ -311,6 +311,6 @@ class MapVizualization(tk.Tk):
         print(state)
         # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
-if __name__ == "__main__":
-    mapVizualization = MapVizualization()
-    mapVizualization.mainloop()
+# if __name__ == "__main__":
+#     mapVizualization = MapVizualization()
+#     mapVizualization.mainloop()
