@@ -8,7 +8,8 @@ from Environment.city import City
 from Environment.model.utils import *
 from Environment.model.constants import *
 from Environment.model.state import State
-from env_vizualization import MapVizualization
+from graphics.env_vizualization import MapVizualization
+from graphics.visual_process import Visualizer
 
 data_filename = 'compressed_q_table'
 path_to_learning_data = Path('learning_data', data_filename)
@@ -42,9 +43,15 @@ class Agent:
 
     def __init__(self, map_sample: int = 0, layout_sample: int = 0):
         self.env = City(map_sample, layout_sample)
+
         self.q_table: dict[State, list[int]] = \
             {state: [0 for _ in range(len(actions))] for state in self.env.P.keys()}
+
         self.state = self.env.reset()
+
+        self.visualizer = Visualizer(self.env)
+        self.visualizer.start()
+        # self.visualizer.join()
 
     def train(self, n_episodes: int = 100, alpha: float = 0.7, gamma: float = 0.7, epsilon: float = 0.8) -> None:
         """
