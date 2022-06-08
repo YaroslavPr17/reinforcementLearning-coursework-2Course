@@ -23,13 +23,18 @@ class MapVizualization(tk.Tk):
     verticalWindow = 1440 // 3 * 2
 
     def setBlockSize(self):
-        self.vertical = self.verticalWindow // self.city.shape[0]
-        self.horizontal = self.horizontalWindow // self.city.shape[1]
-        self.wp = self.vertical // 10 if self.vertical < self.horizontal else self.horizontal // 10
+        if self.verticalWindow < self.horizontalWindow:
+            self.vertical = self.verticalWindow // self.city.shape[0]
+            self.horizontal = self.verticalWindow // self.city.shape[1]
+        else:
+            self.vertical = self.horizontalWindow // self.city.shape[0]
+            self.horizontal = self.horizontalWindow // self.city.shape[1]
+
+        self.wp = self.vertical // 10
 
     def drawContent(self):
         def drawRectangle(xLeft, yTop, xRight, yBottom, fillColor, lineColor):
-            draw.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen(fillColor, 0.5), aggdraw.Brush(fillColor))
+            draw.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen(lineColor, 0.5), aggdraw.Brush(fillColor))
 
         def drawGrass(x0, y0, x1, y1, x2, y2, x3, y3):
             draw.polygon((x0, y0, x1, y1, x2, y2, x3, y3), aggdraw.Pen("#247719", 0.5),aggdraw.Brush("#247719"))
@@ -196,7 +201,7 @@ class MapVizualization(tk.Tk):
             drawGrass(xLeft, yLeftTopGrass, xLeft, yTop, xRight, yTop, xRight, yRightTopGrass)
             drawGrass(xLeft, yLeftBottomGrass, xLeft, yBottom, xRight, yBottom, xRight, yRightBottomGrass)
 
-        image = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (255,255,255,255))
+        image = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (36, 119, 25, 1))
         draw = aggdraw.Draw(image)
 
         for i in range(self.city.shape[0]):
@@ -246,7 +251,7 @@ class MapVizualization(tk.Tk):
 
         self.title("env_visualization")
 
-        self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="white")
+        self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="#247719")
         self.canvas.pack(expand=1,fill=tk.BOTH)
 
 
@@ -299,6 +304,10 @@ class MapVizualization(tk.Tk):
         self.horizontalWindow, self.verticalWindow = event.width, event.height
         self.setBlockSize()
         self.drawContent()
+
+    @staticmethod
+    def callback_agent_draw(state):
+        print(state)
 
 if __name__ == "__main__":
     mapVizualization = MapVizualization()
