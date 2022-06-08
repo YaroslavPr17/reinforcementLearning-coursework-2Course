@@ -22,6 +22,29 @@ class MapVizualization(tk.Tk):
     horizontalWindow = 2560 // 3 * 2
     verticalWindow = 1440 // 3 * 2
 
+    def __init__(self, env: City):
+        super().__init__()
+
+        self.title("env_visualization")
+
+        self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="#247719")
+        self.canvas.pack(expand=1,fill=tk.BOTH)
+
+
+        self.city = env
+        #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
+
+        self.setBlockSize()
+        self.drawContent()
+
+        self.canvas.bind('<MouseWheel>', self.canvas_mouseWheel_event)
+        self.canvas.bind('<Motion>', self.canvas_motion_event)
+        self.canvas.bind('<ButtonPress-1>', self.canvas_buttonPress_event)
+        self.canvas.bind('<ButtonRelease-1>', self.canvas_buttonRelease_event)
+        self.canvas.bind("<Configure>", self.canvas_resize_event)
+
+
+
     def setBlockSize(self):
         if self.verticalWindow < self.horizontalWindow:
             self.vertical = self.verticalWindow // self.city.shape[0]
@@ -246,27 +269,6 @@ class MapVizualization(tk.Tk):
         self.y0 = newY0
         self.drawContent()
 
-    def __init__(self, env: City):
-        super().__init__()
-
-        self.title("env_visualization")
-
-        self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="#247719")
-        self.canvas.pack(expand=1,fill=tk.BOTH)
-
-
-        self.city = env
-        #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
-
-        self.setBlockSize()
-        self.drawContent()
-
-        self.canvas.bind('<MouseWheel>', self.canvas_mouseWheel_event)
-        self.canvas.bind('<Motion>', self.canvas_motion_event)
-        self.canvas.bind('<ButtonPress-1>', self.canvas_buttonPress_event)
-        self.canvas.bind('<ButtonRelease-1>', self.canvas_buttonRelease_event)
-        self.canvas.bind("<Configure>", self.canvas_resize_event)
-
 
     def canvas_mouseWheel_event(self, event):
         # respond to Linux or Windows wheel event
@@ -307,10 +309,6 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw(state):
-        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
+        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
         print(state)
-        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
-
-# if __name__ == "__main__":
-#     mapVizualization = MapVizualization()
-#     mapVizualization.mainloop()
+        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
