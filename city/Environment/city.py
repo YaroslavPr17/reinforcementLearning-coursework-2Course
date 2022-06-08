@@ -12,11 +12,11 @@ from Environment.objects.intersection import Intersection
 from Environment.objects.model_object import Object
 from Environment.objects.road import Road
 from Environment.model import constants
-from Environment.model.constants import actions
+from Environment.model.constants import *
 from Environment.model.state import State
 from Environment.model.utils import *
 
-map_path = Path("Environment", "raw_data")
+
 
 
 def get_observation(city_model: list, direction: str, car_coord: CarCoord, normalize: bool = False) -> np.ndarray:
@@ -97,7 +97,7 @@ class City:
         self._finalize_intersections()
         print("Intersections were finalized.")
 
-        self.print_model_to_file(map_name[0:-4] + 'model.txt')
+        self.print_model_to_file(Path(map_models_folder_name, map_name[0:-4] + 'model.txt'))
 
         self.P = dict()
         self.states = []
@@ -292,7 +292,7 @@ class City:
             if isinstance(down_obj, Road):
                 local_intersection.n_in_lanes['S'] = down_obj.n_lanes.get('N')
 
-    def print_model_to_file(self, filename: str):
+    def print_model_to_file(self, filename: Path):
         with open(Path('Environment', filename), 'w', encoding='UTF-8') as new_map_file:
             for line in self.city_model:
                 print(*line, sep='', file=new_map_file)

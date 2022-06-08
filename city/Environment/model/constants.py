@@ -89,3 +89,5 @@ closest['N'] = ('NW', 'N', 'NE')
 closest['W'] = ('W', 'NW', 'SW')
 closest['E'] = ('SE', 'NE', 'E')
 closest['S'] = ('SW', 'S', 'SE')
+
+map_models_folder_name = 'map_models'
