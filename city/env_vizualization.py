@@ -255,7 +255,7 @@ class MapVizualization(tk.Tk):
         self.canvas.pack(expand=1,fill=tk.BOTH)
 
 
-        self.city = City(map_sample=1, layout_sample=0, narrowing_and_expansion=True)
+        self.city = City(map_sample=0, layout_sample=0, narrowing_and_expansion=True)
         #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
 
         self.setBlockSize()
@@ -307,7 +307,9 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw(state):
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
         print(state)
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 if __name__ == "__main__":
     mapVizualization = MapVizualization()

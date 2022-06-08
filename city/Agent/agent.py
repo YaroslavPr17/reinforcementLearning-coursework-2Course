@@ -8,6 +8,7 @@ from Environment.city import City
 from Environment.model.utils import *
 from Environment.model.constants import *
 from Environment.model.state import State
+from env_vizualization import MapVizualization
 
 data_filename = 'compressed_q_table'
 path_to_learning_data = Path('learning_data', data_filename)
@@ -131,6 +132,9 @@ class Agent:
             sum_reward = 0
 
             while not is_done:
+                # Graphic test callback
+                MapVizualization.callback_agent_draw(self.state)
+
                 if isinstance(np.argmax(self.q_table[self.state]), np.int64):
                     action = np.argmax(self.q_table[self.state])
                 else:
