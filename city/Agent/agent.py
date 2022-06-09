@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 import dill as pickle
 from tqdm import tqdm
@@ -162,7 +163,7 @@ class Agent:
                 sum_reward += reward
                 self.state = next_state
                 self.env.state = next_state
-
+                sleep(3)
             print(f"Episode {episode}: {sum_reward = }\n\n")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
 

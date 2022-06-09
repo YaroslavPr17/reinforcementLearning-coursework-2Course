@@ -9,6 +9,7 @@ from PIL import Image, ImageColor
 from PIL import ImageDraw
 from threading import Thread
 from time import sleep
+from Environment.model.state import State
 
 
 class ThreadUpdater(Thread):
@@ -28,6 +29,10 @@ class MapVizualization(tk.Tk):
     hasFinish = False
     iFinish = 0
     jFinish = 0
+
+    hasAgent = False
+    iAgent = 0
+    jAgent = 0
 
     x0 = 0
     y0 = 0
@@ -302,6 +307,13 @@ class MapVizualization(tk.Tk):
             drawAgent.polygon((points), aggdraw.Pen("red", 0.5),aggdraw.Brush("red"))
             drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 1.5 * self.scale))
 
+        def draw_wehicle(x, y):
+            xLeft = x - (0.5 *self.wp) *self.scale
+            xRight = x + (0.5 *self.wp) *self.scale
+            yTop = y - (0.5 * self.wp) * self.scale
+            yBottom = y + (0.5 * self.wp) * self.scale
+            drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
+
         def drawBlock(horizontalIdx, verticalIdx):
             xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
             xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
@@ -313,6 +325,9 @@ class MapVizualization(tk.Tk):
 
             if MapVizualization.hasFinish and MapVizualization.iFinish == verticalIdx and MapVizualization.jFinish == horizontalIdx:
                 draw_destonation_point(xCenter, yCenter)
+
+            if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
+                draw_wehicle(xCenter, yCenter)
 
         imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
         drawAgent = aggdraw.Draw(imageAgent)
@@ -388,12 +403,15 @@ class MapVizualization(tk.Tk):
         self.drawAgent()
 
     @staticmethod
-    def callback_agent_draw( state):
+    def callback_agent_draw( state:State):
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
         print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
-        MapVizualization.iFinish = state.destination_coordinates[0]
-        MapVizualization.jFinish = state.destination_coordinates[1]
+        MapVizualization.iFinish = state.destination_coordinates.axis0
+        MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
+        MapVizualization.hasAgent = True
+        MapVizualization.iAgent = state.car_coordinates.axis0
+        MapVizualization.jAgent = state.car_coordinates.axis1
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 
