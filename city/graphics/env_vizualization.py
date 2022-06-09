@@ -20,7 +20,7 @@ class ThreadUpdater(Thread):
     def run(self) -> None:
         while self.map.running:
             self.map.drawAgent()
-            print("running")
+            #print("running")
             sleep(1)
 
 class MapVizualization(tk.Tk):
@@ -48,15 +48,7 @@ class MapVizualization(tk.Tk):
     horizontalWindow = 2560 // 3 * 2
     verticalWindow = 1440 // 3 * 2
 
-    # def threaded_function(self):
-    #     while self.running:
-    #         print("running")
-    #         sleep(1)
-    #
-    # def run(self) -> None:
-    #     while self.running:
-    #         print("running")
-    #         sleep(1)
+
 
     def __init__(self, env: City):
         super().__init__()
@@ -68,7 +60,6 @@ class MapVizualization(tk.Tk):
 
 
         self.city = env
-        #self.city = City(map_sample=2, layout_sample=0, narrowing_and_expansion=True)
 
         self.setBlockSize()
         self.drawContent()
@@ -89,14 +80,13 @@ class MapVizualization(tk.Tk):
         self.thread.join()
 
     def setBlockSize(self):
-        if self.verticalWindow < self.horizontalWindow:
-            self.vertical = self.verticalWindow // self.city.shape[0]
-            self.horizontal = self.verticalWindow // self.city.shape[1]
+        self.vertical = self.verticalWindow / self.city.shape[0]
+        self.horizontal = self.horizontalWindow / self.city.shape[1]
+        if self.vertical < self.horizontal:
+            self.horizontal = self.vertical
         else:
-            self.vertical = self.horizontalWindow // self.city.shape[0]
-            self.horizontal = self.horizontalWindow // self.city.shape[1]
-
-        self.wp = self.vertical // 10
+            self.vertical = self.horizontal
+        self.wp = self.vertical / 10
 
     def idxToX(self, idx):
         return idx * self.horizontal
@@ -110,6 +100,28 @@ class MapVizualization(tk.Tk):
 
         def drawGrass(x0, y0, x1, y1, x2, y2, x3, y3):
             draw.polygon((x0, y0, x1, y1, x2, y2, x3, y3), aggdraw.Pen("#247719", 0.5),aggdraw.Brush("#247719"))
+
+        def drawVerticalDashLine(x, yTop, yBottom):
+            i = 0
+            while True:
+                y1 = yTop + i * self.wp * self.scale
+                y2 = yTop + (i + 1) * self.wp * self.scale
+                if y2 > yBottom:
+                    break
+                if i % 2 == 0:
+                    draw.line((x, y1, x, y2), aggdraw.Pen("white", 1 * self.scale))
+                i = i + 1
+
+        def drawHorizontalDashLine(xLeft, xRight, y):
+            i = 0
+            while True:
+                x1 = xLeft + i * self.wp * self.scale
+                x2 = xLeft + (i + 1) * self.wp * self.scale
+                if x2 > xRight:
+                    break
+                if i % 2 == 0:
+                    draw.line((x1, y, x2, y), aggdraw.Pen("white", 1 * self.scale))
+                i = i + 1
 
         def isRoad(i, j):
             return ((i > 0) and (i <= self.city.shape[0]) and (j > 0) and (j <= self.city.shape[1]) and (isinstance(self.city.city_model[i][j], Road)))
@@ -134,73 +146,73 @@ class MapVizualization(tk.Tk):
             yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
             yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
 
-            drawRectangle(xLeft, yTop, xRight, yBottom, "#247719", "#247719")
+            drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
 
-            xCenter = xLeft + (xRight - xLeft) // 2
-            yCenter = yTop + (yBottom - yTop) // 2
-
-            xLeftTop = xCenter
-            xRightTop = xCenter
-            if (isRoad(verticalIdx - 1, horizontalIdx)):
-                xLeftTop = xCenter - self.wp * getLeftCount(verticalIdx - 1, horizontalIdx) * self.scale
-                xRightTop = xCenter + self.wp * getRightCount(verticalIdx - 1, horizontalIdx) * self.scale
-            elif (isRoad(verticalIdx + 1, horizontalIdx)):
-                xLeftTop = xCenter - self.wp * getLeftCount(verticalIdx + 1, horizontalIdx) * self.scale
-                xRightTop = xCenter + self.wp * getRightCount(verticalIdx + 1, horizontalIdx) * self.scale
-
-            xLeftBottom = xCenter
-            xRightBottom = xCenter
-            if (isRoad(verticalIdx + 1, horizontalIdx)):
-                xLeftBottom = xCenter - self.wp * getLeftCount(verticalIdx + 1, horizontalIdx) * self.scale
-                xRightBottom = xCenter + self.wp * getRightCount(verticalIdx + 1, horizontalIdx) * self.scale
-            elif (isRoad(verticalIdx - 1, horizontalIdx)):
-                xLeftBottom = xCenter - self.wp * getLeftCount(verticalIdx - 1, horizontalIdx) * self.scale
-                xRightBottom = xCenter + self.wp * getRightCount(verticalIdx - 1, horizontalIdx) * self.scale
-
-            yLeftTop = yCenter
-            yLeftBottom = yCenter
-            if (isRoad(verticalIdx, horizontalIdx - 1)):
-                yLeftTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx - 1) * self.scale
-                yLeftBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx - 1) * self.scale
-            elif (isRoad(verticalIdx, horizontalIdx + 1)):
-                yLeftTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx + 1) * self.scale
-                yLeftBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx + 1) * self.scale
-
-            yRightTop = yCenter
-            yRightBottom = yCenter
-            if (isRoad(verticalIdx, horizontalIdx + 1)):
-                yRightTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx + 1) * self.scale
-                yRightBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx + 1) * self.scale
-            elif (isRoad(verticalIdx, horizontalIdx - 1)):
-                yRightTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx - 1) * self.scale
-                yRightBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx - 1) * self.scale
-
-            if (not isRoad(verticalIdx - 1, horizontalIdx)):
-                yTop = yRightTop
-
-            if (not isRoad(verticalIdx + 1, horizontalIdx)):
-                yBottom = yRightBottom
-
-            if (not isRoad(verticalIdx, horizontalIdx - 1)):
-                xLeft = xLeftBottom
-
-            if (not isRoad(verticalIdx, horizontalIdx + 1)):
-                xRight = xRightBottom
-
-            points = [xLeft, yLeftTop,
-                      xLeftTop, yLeftTop,
-                      xLeftTop, yTop,
-                      xRightTop, yTop,
-                      xRightTop, yRightTop,
-                      xRight, yRightTop,
-                      xRight, yRightBottom,
-                      xRightBottom, yRightBottom,
-                      xRightBottom, yBottom,
-                      xLeftBottom, yBottom,
-                      xLeftBottom, yLeftBottom,
-                      xLeft, yLeftBottom]
-
-            draw.polygon((points), aggdraw.Pen("gray", 0.5),aggdraw.Brush("gray"))
+            # xCenter = xLeft + (xRight - xLeft) // 2
+            # yCenter = yTop + (yBottom - yTop) // 2
+            #
+            # xLeftTop = xCenter
+            # xRightTop = xCenter
+            # if (isRoad(verticalIdx - 1, horizontalIdx)):
+            #     xLeftTop = xCenter - self.wp * getLeftCount(verticalIdx - 1, horizontalIdx) * self.scale
+            #     xRightTop = xCenter + self.wp * getRightCount(verticalIdx - 1, horizontalIdx) * self.scale
+            # elif (isRoad(verticalIdx + 1, horizontalIdx)):
+            #     xLeftTop = xCenter - self.wp * getLeftCount(verticalIdx + 1, horizontalIdx) * self.scale
+            #     xRightTop = xCenter + self.wp * getRightCount(verticalIdx + 1, horizontalIdx) * self.scale
+            #
+            # xLeftBottom = xCenter
+            # xRightBottom = xCenter
+            # if (isRoad(verticalIdx + 1, horizontalIdx)):
+            #     xLeftBottom = xCenter - self.wp * getLeftCount(verticalIdx + 1, horizontalIdx) * self.scale
+            #     xRightBottom = xCenter + self.wp * getRightCount(verticalIdx + 1, horizontalIdx) * self.scale
+            # elif (isRoad(verticalIdx - 1, horizontalIdx)):
+            #     xLeftBottom = xCenter - self.wp * getLeftCount(verticalIdx - 1, horizontalIdx) * self.scale
+            #     xRightBottom = xCenter + self.wp * getRightCount(verticalIdx - 1, horizontalIdx) * self.scale
+            #
+            # yLeftTop = yCenter
+            # yLeftBottom = yCenter
+            # if (isRoad(verticalIdx, horizontalIdx - 1)):
+            #     yLeftTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx - 1) * self.scale
+            #     yLeftBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx - 1) * self.scale
+            # elif (isRoad(verticalIdx, horizontalIdx + 1)):
+            #     yLeftTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx + 1) * self.scale
+            #     yLeftBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx + 1) * self.scale
+            #
+            # yRightTop = yCenter
+            # yRightBottom = yCenter
+            # if (isRoad(verticalIdx, horizontalIdx + 1)):
+            #     yRightTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx + 1) * self.scale
+            #     yRightBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx + 1) * self.scale
+            # elif (isRoad(verticalIdx, horizontalIdx - 1)):
+            #     yRightTop = yCenter - self.wp * getLeftCount(verticalIdx, horizontalIdx - 1) * self.scale
+            #     yRightBottom = yCenter + self.wp * getRightCount(verticalIdx, horizontalIdx - 1) * self.scale
+            #
+            # if (not isRoad(verticalIdx - 1, horizontalIdx)):
+            #     yTop = yRightTop
+            #
+            # if (not isRoad(verticalIdx + 1, horizontalIdx)):
+            #     yBottom = yRightBottom
+            #
+            # if (not isRoad(verticalIdx, horizontalIdx - 1)):
+            #     xLeft = xLeftBottom
+            #
+            # if (not isRoad(verticalIdx, horizontalIdx + 1)):
+            #     xRight = xRightBottom
+            #
+            # points = [xLeft, yLeftTop,
+            #           xLeftTop, yLeftTop,
+            #           xLeftTop, yTop,
+            #           xRightTop, yTop,
+            #           xRightTop, yRightTop,
+            #           xRight, yRightTop,
+            #           xRight, yRightBottom,
+            #           xRightBottom, yRightBottom,
+            #           xRightBottom, yBottom,
+            #           xLeftBottom, yBottom,
+            #           xLeftBottom, yLeftBottom,
+            #           xLeft, yLeftBottom]
+            #
+            # draw.polygon((points), aggdraw.Pen("gray", 0.5),aggdraw.Brush("gray"))
 
         def drawVerticalRoad(horizontalIdx, verticalIdx):
             xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
@@ -213,26 +225,28 @@ class MapVizualization(tk.Tk):
             xCenter = xLeft + (xRight - xLeft) // 2
 
             # рисуем центральную линию: двойная сполшная и т.д.
-            # пунктирная линия - параметр dash=(15, 15)
-            if (self.wp * self.scale > 5):
-                draw.line((xCenter - 1.3 * self.scale, yTop, xCenter - 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
-                draw.line((xCenter + 1.3 * self.scale, yTop, xCenter + 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
+            # if (self.wp * self.scale > 5):
+            #     draw.line((xCenter - 1.3 * self.scale, yTop, xCenter - 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
+            #     draw.line((xCenter + 1.3 * self.scale, yTop, xCenter + 1.3 * self.scale, yBottom), aggdraw.Pen("white", 1 * self.scale))
 
             # количество полос сверху
             leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
             rightTopCount = getRightCount(verticalIdx, horizontalIdx)
             leftBottomCount = getLeftCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1, horizontalIdx) else getLeftCount(verticalIdx, horizontalIdx)
             rightBottomCount = getRightCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1, horizontalIdx) else getRightCount(verticalIdx, horizontalIdx)
-            # print(f"LeftTopCount = {leftTopCount}, rightTopCount = {rightTopCount}, leftBottomCount = {leftBottomCount}, rightBottomCount = {rightBottomCount}")
 
             # координаты для травы
-            xLeftTopGrass = xCenter - self.wp * leftTopCount * self.scale
-            xLeftBottomGrass = xCenter - self.wp * leftBottomCount * self.scale
-            xRightTopGrass = xCenter + self.wp * rightTopCount * self.scale
-            xRightBottomGrass = xCenter + self.wp * rightBottomCount * self.scale
+            xLeftTopGrass = xLeft + self.wp * leftTopCount * self.scale
+            xLeftBottomGrass = xLeft + self.wp * leftBottomCount * self.scale
+            xRightTopGrass = xRight - self.wp * rightTopCount * self.scale
+            xRightBottomGrass = xRight - self.wp * rightBottomCount * self.scale
 
-            drawGrass(xLeft, yTop, xLeftTopGrass, yTop, xLeftBottomGrass, yBottom, xLeft, yBottom)
-            drawGrass(xRight, yTop, xRightTopGrass, yTop, xRightBottomGrass, yBottom, xRight, yBottom)
+            for i in range(1, 10):
+                drawVerticalDashLine(xLeft + i * self.wp * self.scale, yTop, yBottom)
+
+            drawGrass(xLeftTopGrass, yTop, xRightTopGrass, yTop, xRightBottomGrass, yBottom, xLeftBottomGrass, yBottom)
+            draw.line((xLeftTopGrass, yTop, xLeftBottomGrass, yBottom), aggdraw.Pen("black", 1.5 * self.scale))
+            draw.line((xRightTopGrass, yTop, xRightBottomGrass, yBottom), aggdraw.Pen("black", 1.5 * self.scale))
 
         def drawHorizontalRoad(horizontalIdx, verticalIdx):
             xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
@@ -245,10 +259,9 @@ class MapVizualization(tk.Tk):
             yCenter = yTop + (yBottom - yTop) // 2
 
             # рисуем центральную линию: двойная сполшная и т.д.
-            # пунктирная линия - параметр dash=(15, 15)
-            if (self.wp * self.scale > 5):
-                draw.line((xLeft, yCenter - 1.3 * self.scale, xRight, yCenter - 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
-                draw.line((xLeft, yCenter + 1.3 * self.scale, xRight, yCenter + 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
+            # if (self.wp * self.scale > 5):
+            #     draw.line((xLeft, yCenter - 1.3 * self.scale, xRight, yCenter - 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
+            #     draw.line((xLeft, yCenter + 1.3 * self.scale, xRight, yCenter + 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
 
             # количество полос сверху
             leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
@@ -256,16 +269,19 @@ class MapVizualization(tk.Tk):
 
             rightTopCount = getLeftCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getLeftCount(verticalIdx, horizontalIdx)
             rightBottomCount = getRightCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getRightCount(verticalIdx, horizontalIdx)
-            # print(f"LeftTopCount = {leftTopCount}, rightTopCount = {rightTopCount}, leftBottomCount = {leftBottomCount}, rightBottomCount = {rightBottomCount}")
 
             # координаты для травы
-            yLeftTopGrass = yCenter - self.wp * leftTopCount * self.scale
-            yRightTopGrass = yCenter - self.wp * rightTopCount * self.scale
-            yLeftBottomGrass = yCenter + self.wp * leftBottomCount * self.scale
-            yRightBottomGrass = yCenter + self.wp * rightBottomCount * self.scale
+            yLeftTopGrass = yTop + self.wp * leftTopCount * self.scale
+            yRightTopGrass = yTop + self.wp * rightTopCount * self.scale
+            yLeftBottomGrass = yBottom - self.wp * leftBottomCount * self.scale
+            yRightBottomGrass = yBottom - self.wp * rightBottomCount * self.scale
 
-            drawGrass(xLeft, yLeftTopGrass, xLeft, yTop, xRight, yTop, xRight, yRightTopGrass)
-            drawGrass(xLeft, yLeftBottomGrass, xLeft, yBottom, xRight, yBottom, xRight, yRightBottomGrass)
+            for i in range(1, 10):
+                drawHorizontalDashLine(xLeft, xRight, yTop + i * self.wp * self.scale)
+
+            drawGrass(xLeft, yLeftTopGrass, xRight, yRightTopGrass, xRight, yRightBottomGrass, xLeft, yLeftBottomGrass)
+            draw.line((xLeft, yLeftTopGrass, xRight, yRightTopGrass), aggdraw.Pen("black", 1.5 * self.scale))
+            draw.line((xRight, yRightBottomGrass, xLeft, yLeftBottomGrass), aggdraw.Pen("black", 1.5 * self.scale))
 
         image = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (36, 119, 25, 1))
         draw = aggdraw.Draw(image)
@@ -296,7 +312,7 @@ class MapVizualization(tk.Tk):
 
     def drawAgent(self):
         def draw_destonation_point(x, y):
-            print(x, y)
+            #print(x, y)
             yTop = y - (4 * self.wp) * self.scale
             yBottom = y - (1 * self.wp) * self.scale
             xRight = x + (3 *self.wp) * self.scale
@@ -465,8 +481,8 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw( state:State):
-        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
-        print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
+        # print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
@@ -474,7 +490,7 @@ class MapVizualization(tk.Tk):
         MapVizualization.iAgent = state.car_coordinates.axis0
         MapVizualization.jAgent = state.car_coordinates.axis1
         MapVizualization.agentDirection = state.current_direction
-        print(f"current direction is {state.current_direction}")
-        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
+        # print(f"current direction is {state.current_direction}")
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 
