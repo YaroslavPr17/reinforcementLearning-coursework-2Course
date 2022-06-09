@@ -6,8 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="985dc904-39bf-4c83-a543-dfbe27179149" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/graph_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/graph_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/graphics/env_vizualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/env_vizualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/visual_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/visual_process.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -212,7 +212,8 @@
       <workItem from="1654544488273" duration="1441000" />
       <workItem from="1654575839445" duration="5168000" />
       <workItem from="1654610729458" duration="61000" />
-      <workItem from="1654715839960" duration="321000" />
+      <workItem from="1654715839960" duration="1069000" />
+      <workItem from="1654748685286" duration="12859000" />
     </task>
     <servers />
   </component>
@@ -234,5 +235,7 @@
     <SUITE FILE_PATH="coverage/city$graph_test.coverage" NAME="graph_test Coverage Results" MODIFIED="1654716158107" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/city$env_vizualization__2_.coverage" NAME="env_vizualization (2) Coverage Results" MODIFIED="1654699996343" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/graphics" />
     <SUITE FILE_PATH="coverage/city$env_vizualization__1_.coverage" NAME="env_vizualization (1) Coverage Results" MODIFIED="1654715864288" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/city$visualization_test__1_.coverage" NAME="visualization_test (1) Coverage Results" MODIFIED="1654786053187" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/city$.coverage" NAME=" Coverage Results" MODIFIED="1654716251765" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

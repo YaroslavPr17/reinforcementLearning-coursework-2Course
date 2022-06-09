@@ -12,3 +12,4 @@ class Visualizer(threading.Thread):
     def run(self) -> None:
         map_visualization = MapVizualization(self.env)
         map_visualization.mainloop()
+        map_visualization.clear()
