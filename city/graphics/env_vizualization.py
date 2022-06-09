@@ -33,6 +33,7 @@ class MapVizualization(tk.Tk):
     hasAgent = False
     iAgent = 0
     jAgent = 0
+    agentDirection = "Z"
 
     x0 = 0
     y0 = 0
@@ -305,14 +306,74 @@ class MapVizualization(tk.Tk):
                       xRight, yRight]
 
             drawAgent.polygon((points), aggdraw.Pen("red", 0.5),aggdraw.Brush("red"))
-            drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 1.5 * self.scale))
+            drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 3 * self.scale))
 
-        def draw_wehicle(x, y):
-            xLeft = x - (0.5 *self.wp) *self.scale
-            xRight = x + (0.5 *self.wp) *self.scale
-            yTop = y - (0.5 * self.wp) * self.scale
-            yBottom = y + (0.5 * self.wp) * self.scale
-            drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
+        def draw_wehicle(x, y,):
+            # xLeft = x - (0.5 *self.wp) *self.scale
+            # xRight = x + (0.5 *self.wp) *self.scale
+            # yTop = y - (0.5 * self.wp) * self.scale
+            # yBottom = y + (0.5 * self.wp) * self.scale
+            # drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "N":
+                xLeft = x - (0.5 * self.wp) * self.scale
+                xRight = x + (0.5 * self.wp) * self.scale
+                xMiddle = x
+                yTop = y - (1.5 * self.wp) * self.scale
+                yMiddle = y - (0.5 * self.wp) * self.scale
+                yBottom = y + (0.5 * self.wp) * self.scale
+
+                points = [xLeft, yBottom,
+                          xLeft, yMiddle,
+                          xMiddle, yTop,
+                          xRight, yMiddle,
+                          xRight, yBottom]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "S":
+                xLeft = x - (0.5 * self.wp) * self.scale
+                xRight = x + (0.5 * self.wp) * self.scale
+                xMiddle = x
+                yTop = y - (0.5 * self.wp) * self.scale
+                yMiddle = y + (0.5 * self.wp) * self.scale
+                yBottom = y + (1.5 * self.wp) * self.scale
+
+                points = [xLeft, yMiddle,
+                          xLeft, yTop,
+                          xRight, yTop,
+                          xRight, yMiddle,
+                          xMiddle, yBottom]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "W":
+                xLeft = x - (1.5 * self.wp) * self.scale
+                xRight = x + (0.5 * self.wp) * self.scale
+                xMiddle = x - (0.5 * self.wp) * self.scale
+                yTop = y - (0.5 * self.wp) * self.scale
+                yMiddle = y
+                yBottom = y + (0.5 * self.wp) * self.scale
+
+                points = [xLeft, yMiddle,
+                          xMiddle, yTop,
+                          xRight, yTop,
+                          xRight, yBottom,
+                          xMiddle, yBottom]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "E":
+                xLeft = x - (0.5 * self.wp) * self.scale
+                xRight = x + (1.5 * self.wp) * self.scale
+                xMiddle = x + (0.5 * self.wp) * self.scale
+                yTop = y - (0.5 * self.wp) * self.scale
+                yMiddle = y
+                yBottom = y + (0.5 * self.wp) * self.scale
+
+                points = [xLeft, yTop,
+                          xMiddle, yTop,
+                          xRight, yMiddle,
+                          xMiddle, yBottom,
+                          xLeft, yBottom]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
         def drawBlock(horizontalIdx, verticalIdx):
             xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
@@ -412,6 +473,8 @@ class MapVizualization(tk.Tk):
         MapVizualization.hasAgent = True
         MapVizualization.iAgent = state.car_coordinates.axis0
         MapVizualization.jAgent = state.car_coordinates.axis1
+        MapVizualization.agentDirection = state.current_direction
+        print(f"current direction is {state.current_direction}")
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 
