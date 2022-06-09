@@ -7,8 +7,28 @@ from tkinter import Canvas
 from PIL import Image, ImageTk
 from PIL import Image, ImageColor
 from PIL import ImageDraw
+from threading import Thread
+from time import sleep
+
+
+class ThreadUpdater(Thread):
+    def __init__(self, map):
+        super().__init__()
+        self.map = map
+
+    def run(self) -> None:
+        while self.map.running:
+            self.map.drawAgent()
+            print("running")
+            sleep(1)
 
 class MapVizualization(tk.Tk):
+    running = True
+
+    hasFinish = False
+    iFinish = 0
+    jFinish = 0
+
     x0 = 0
     y0 = 0
 
@@ -21,6 +41,16 @@ class MapVizualization(tk.Tk):
 
     horizontalWindow = 2560 // 3 * 2
     verticalWindow = 1440 // 3 * 2
+
+    # def threaded_function(self):
+    #     while self.running:
+    #         print("running")
+    #         sleep(1)
+    #
+    # def run(self) -> None:
+    #     while self.running:
+    #         print("running")
+    #         sleep(1)
 
     def __init__(self, env: City):
         super().__init__()
@@ -36,6 +66,7 @@ class MapVizualization(tk.Tk):
 
         self.setBlockSize()
         self.drawContent()
+        self.drawAgent()
 
         self.canvas.bind('<MouseWheel>', self.canvas_mouseWheel_event)
         self.canvas.bind('<Motion>', self.canvas_motion_event)
@@ -43,7 +74,13 @@ class MapVizualization(tk.Tk):
         self.canvas.bind('<ButtonRelease-1>', self.canvas_buttonRelease_event)
         self.canvas.bind("<Configure>", self.canvas_resize_event)
 
+        self.thread = ThreadUpdater(self)
+        self.thread.start()
 
+    def clear(self):
+        print("del map")
+        self.running = False
+        self.thread.join()
 
     def setBlockSize(self):
         if self.verticalWindow < self.horizontalWindow:
@@ -55,18 +92,18 @@ class MapVizualization(tk.Tk):
 
         self.wp = self.vertical // 10
 
+    def idxToX(self, idx):
+        return idx * self.horizontal
+
+    def idxToY(self, idx):
+        return idx * self.vertical
+
     def drawContent(self):
         def drawRectangle(xLeft, yTop, xRight, yBottom, fillColor, lineColor):
             draw.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen(lineColor, 0.5), aggdraw.Brush(fillColor))
 
         def drawGrass(x0, y0, x1, y1, x2, y2, x3, y3):
             draw.polygon((x0, y0, x1, y1, x2, y2, x3, y3), aggdraw.Pen("#247719", 0.5),aggdraw.Brush("#247719"))
-
-        def idxToX(idx):
-            return idx * self.horizontal
-
-        def idxToY(idx):
-            return idx * self.vertical
 
         def isRoad(i, j):
             return ((i > 0) and (i <= self.city.shape[0]) and (j > 0) and (j <= self.city.shape[1]) and (isinstance(self.city.city_model[i][j], Road)))
@@ -78,18 +115,18 @@ class MapVizualization(tk.Tk):
             return [len(value) for key, value in self.city.city_model[i][j].lanes.items()][0]
 
         def drawGround(horizontalIdx, verticalIdx):
-            xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
-            xRight = self.x0 + idxToX(horizontalIdx + 1) * self.scale
-            yTop = self.y0 + idxToY(verticalIdx) * self.scale
-            yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
+            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
+            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
+            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
+            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
 
             drawRectangle(xLeft, yTop, xRight, yBottom, "#247719", "#247719")
 
         def drawIntersection(horizontalIdx, verticalIdx):
-            xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
-            xRight = self.x0 + idxToX(horizontalIdx + 1) * self.scale
-            yTop = self.y0 + idxToY(verticalIdx) * self.scale
-            yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
+            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
+            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
+            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
+            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
 
             drawRectangle(xLeft, yTop, xRight, yBottom, "#247719", "#247719")
 
@@ -160,10 +197,10 @@ class MapVizualization(tk.Tk):
             draw.polygon((points), aggdraw.Pen("gray", 0.5),aggdraw.Brush("gray"))
 
         def drawVerticalRoad(horizontalIdx, verticalIdx):
-            xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
-            xRight = self.x0 + idxToX(horizontalIdx + 1) * self.scale
-            yTop = self.y0 + idxToY(verticalIdx) * self.scale
-            yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
+            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
+            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
+            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
+            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
 
             drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
 
@@ -192,10 +229,10 @@ class MapVizualization(tk.Tk):
             drawGrass(xRight, yTop, xRightTopGrass, yTop, xRightBottomGrass, yBottom, xRight, yBottom)
 
         def drawHorizontalRoad(horizontalIdx, verticalIdx):
-            xLeft = self.x0 + idxToX(horizontalIdx) * self.scale
-            xRight = self.x0 + idxToX(horizontalIdx + 1) * self.scale
-            yTop = self.y0 + idxToY(verticalIdx) * self.scale
-            yBottom = self.y0 + idxToY(verticalIdx + 1) * self.scale
+            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
+            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
+            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
+            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
 
             drawRectangle(xLeft, yTop, xRight, yBottom, "gray", "gray")
 
@@ -251,6 +288,46 @@ class MapVizualization(tk.Tk):
         self.tk_image = ImageTk.PhotoImage(image)
         self.canvas.create_image((0, 0), anchor='nw' ,image=self.tk_image)
 
+    def drawAgent(self):
+        def draw_destonation_point(x, y):
+            print(x, y)
+            yTop = y - (4 * self.wp) * self.scale
+            yBottom = y - (1 * self.wp) * self.scale
+            xRight = x + (3 *self.wp) * self.scale
+            yRight = y - (2.5 * self.wp) * self.scale
+            points = [x, yBottom,
+                      x, yTop,
+                      xRight, yRight]
+
+            drawAgent.polygon((points), aggdraw.Pen("red", 0.5),aggdraw.Brush("red"))
+            drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 1.5 * self.scale))
+
+        def drawBlock(horizontalIdx, verticalIdx):
+            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
+            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
+            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
+            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
+
+            xCenter = xLeft + (xRight - xLeft) // 2
+            yCenter = yTop + (yBottom - yTop) // 2
+
+            if MapVizualization.hasFinish and MapVizualization.iFinish == verticalIdx and MapVizualization.jFinish == horizontalIdx:
+                draw_destonation_point(xCenter, yCenter)
+
+        imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
+        drawAgent = aggdraw.Draw(imageAgent)
+
+        for i in range(self.city.shape[0]):
+            for j in range(self.city.shape[1]):
+                drawBlock(j, i)
+
+        drawAgent.flush()
+        self.tk_imageAgent = ImageTk.PhotoImage(imageAgent)
+        self.canvas.create_image((0, 0), anchor='nw', image=self.tk_imageAgent)
+
+
+
+
     def updateContent(self, x, y):
 
         newX0 = self.x0 + x - self.xMouse
@@ -268,7 +345,7 @@ class MapVizualization(tk.Tk):
         self.x0 = newX0
         self.y0 = newY0
         self.drawContent()
-
+        self.drawAgent()
 
     def canvas_mouseWheel_event(self, event):
         # respond to Linux or Windows wheel event
@@ -276,9 +353,11 @@ class MapVizualization(tk.Tk):
             if self.scale > 1:
                 self.scale -= 0.1
                 self.drawContent()
+                self.drawAgent()
         if event.num == 4 or event.delta == 120:
             self.scale += 0.1
             self.drawContent()
+            self.drawAgent()
         print('Scale: ', self.scale)
 
     def canvas_motion_event(self, event):
@@ -306,9 +385,15 @@ class MapVizualization(tk.Tk):
         self.horizontalWindow, self.verticalWindow = event.width, event.height
         self.setBlockSize()
         self.drawContent()
+        self.drawAgent()
 
     @staticmethod
-    def callback_agent_draw(state):
+    def callback_agent_draw( state):
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
-        print(state)
+        print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
+        MapVizualization.iFinish = state.destination_coordinates[0]
+        MapVizualization.jFinish = state.destination_coordinates[1]
+        MapVizualization.hasFinish = True
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
+
+
