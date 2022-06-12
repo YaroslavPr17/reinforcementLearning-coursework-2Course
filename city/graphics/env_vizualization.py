@@ -20,8 +20,9 @@ class ThreadUpdater(Thread):
     def run(self) -> None:
         while self.map.running:
             self.map.drawAgent()
+            MapVizualization.agentPosition = MapVizualization.agentPosition + 1
             #print("running")
-            sleep(1)
+            sleep(0.125)
 
 class MapVizualization(tk.Tk):
     running = True
@@ -35,6 +36,7 @@ class MapVizualization(tk.Tk):
     jAgent = 0
     agentDirection = "Z"
     agentLaneNumber = 16
+    agentPosition = 0
 
     x0 = 0
     y0 = 0
@@ -265,11 +267,14 @@ class MapVizualization(tk.Tk):
             #     draw.line((xLeft, yCenter + 1.3 * self.scale, xRight, yCenter + 1.3 * self.scale), aggdraw.Pen("white", 1 * self.scale))
 
             # количество полос сверху
-            leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
-            leftBottomCount = getRightCount(verticalIdx, horizontalIdx)
+            leftTopCount = getRightCount(verticalIdx, horizontalIdx)
+            leftBottomCount = getLeftCount(verticalIdx, horizontalIdx)
 
-            rightTopCount = getLeftCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getLeftCount(verticalIdx, horizontalIdx)
-            rightBottomCount = getRightCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getRightCount(verticalIdx, horizontalIdx)
+            rightTopCount = getRightCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getRightCount(verticalIdx, horizontalIdx)
+            rightBottomCount = getLeftCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getLeftCount(verticalIdx, horizontalIdx)
+
+
+
 
             # координаты для травы
             yLeftTopGrass = yTop + self.wp * leftTopCount * self.scale
@@ -336,9 +341,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 xRight = x + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
                 xMiddle = x + (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (1.5 * self.wp) * self.scale
-                yMiddle = y - (0.5 * self.wp) * self.scale
-                yBottom = y + (0.5 * self.wp) * self.scale
+                yTop = y - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
+                yMiddle = y - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
+                yBottom = y + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
 
                 points = [xLeft, yBottom,
                           xLeft, yMiddle,
@@ -351,9 +356,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x - (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 xRight = x - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
                 xMiddle = x - (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (0.5 * self.wp) * self.scale
-                yMiddle = y + (0.5 * self.wp) * self.scale
-                yBottom = y + (1.5 * self.wp) * self.scale
+                yTop = y - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
+                yMiddle = y + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
+                yBottom = y + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
 
                 points = [xLeft, yMiddle,
                           xLeft, yTop,
@@ -363,9 +368,9 @@ class MapVizualization(tk.Tk):
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "W":
-                xLeft = x - (1.5 * self.wp) * self.scale
-                xRight = x + (0.5 * self.wp) * self.scale
-                xMiddle = x - (0.5 * self.wp) * self.scale
+                xLeft = x - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xRight = x + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xMiddle = x - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
                 yTop = y - (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yMiddle = y - (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
@@ -378,9 +383,9 @@ class MapVizualization(tk.Tk):
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "E":
-                xLeft = x - (0.5 * self.wp) * self.scale
-                xRight = x + (1.5 * self.wp) * self.scale
-                xMiddle = x + (0.5 * self.wp) * self.scale
+                xLeft = x - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xRight = x + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xMiddle = x + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
                 yTop = y + (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yMiddle = y + (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
@@ -401,8 +406,11 @@ class MapVizualization(tk.Tk):
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
 
+
+
             if MapVizualization.hasFinish and MapVizualization.iFinish == verticalIdx and MapVizualization.jFinish == horizontalIdx:
                 draw_destonation_point(xCenter, yCenter)
+
 
             if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
                 draw_wehicle(xCenter, yCenter)
@@ -492,6 +500,7 @@ class MapVizualization(tk.Tk):
         MapVizualization.jAgent = state.car_coordinates.axis1
         MapVizualization.agentDirection = state.current_direction
         MapVizualization.agentLaneNumber = state.current_lane
+        MapVizualization.agentPosition = 0
         print(f"current lane number is is {state.current_lane}")
         print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 

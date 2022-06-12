@@ -141,7 +141,7 @@ class Agent:
 
             while not is_done:
                 # Graphic test callback
-                MapVizualization.callback_agent_draw(self.state)
+                # MapVizualization.callback_agent_draw(self.state)
 
                 if isinstance(np.argmax(self.q_table[self.state]), np.int64):
                     action = np.argmax(self.q_table[self.state])
@@ -163,6 +163,7 @@ class Agent:
                 sum_reward += reward
                 self.state = next_state
                 self.env.state = next_state
+                MapVizualization.callback_agent_draw(self.state)
                 sleep(3)
             print(f"Episode {episode}: {sum_reward = }\n\n")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
