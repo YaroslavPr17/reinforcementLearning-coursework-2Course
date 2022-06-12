@@ -34,6 +34,7 @@ class MapVizualization(tk.Tk):
     iAgent = 0
     jAgent = 0
     agentDirection = "Z"
+    agentLaneNumber = 16
 
     x0 = 0
     y0 = 0
@@ -332,9 +333,9 @@ class MapVizualization(tk.Tk):
             # drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "N":
-                xLeft = x - (0.5 * self.wp) * self.scale
-                xRight = x + (0.5 * self.wp) * self.scale
-                xMiddle = x
+                xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                xRight = x + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
+                xMiddle = x + (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yTop = y - (1.5 * self.wp) * self.scale
                 yMiddle = y - (0.5 * self.wp) * self.scale
                 yBottom = y + (0.5 * self.wp) * self.scale
@@ -347,9 +348,9 @@ class MapVizualization(tk.Tk):
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "S":
-                xLeft = x - (0.5 * self.wp) * self.scale
-                xRight = x + (0.5 * self.wp) * self.scale
-                xMiddle = x
+                xLeft = x - (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                xRight = x - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
+                xMiddle = x - (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yTop = y - (0.5 * self.wp) * self.scale
                 yMiddle = y + (0.5 * self.wp) * self.scale
                 yBottom = y + (1.5 * self.wp) * self.scale
@@ -365,9 +366,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x - (1.5 * self.wp) * self.scale
                 xRight = x + (0.5 * self.wp) * self.scale
                 xMiddle = x - (0.5 * self.wp) * self.scale
-                yTop = y - (0.5 * self.wp) * self.scale
-                yMiddle = y
-                yBottom = y + (0.5 * self.wp) * self.scale
+                yTop = y - (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                yMiddle = y - (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                yBottom = y - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
 
                 points = [xLeft, yMiddle,
                           xMiddle, yTop,
@@ -380,9 +381,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x - (0.5 * self.wp) * self.scale
                 xRight = x + (1.5 * self.wp) * self.scale
                 xMiddle = x + (0.5 * self.wp) * self.scale
-                yTop = y - (0.5 * self.wp) * self.scale
-                yMiddle = y
-                yBottom = y + (0.5 * self.wp) * self.scale
+                yTop = y + (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                yMiddle = y + (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
+                yBottom = y + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
 
                 points = [xLeft, yTop,
                           xMiddle, yTop,
@@ -460,7 +461,7 @@ class MapVizualization(tk.Tk):
         # print('Motion: ', event.x, event.y)
 
     def canvas_buttonPress_event(self, event):
-        self.something_clicked = 0
+        self.something_clicked = 0  
         if self.scale > 1:
             self.moveMode = True
         self.xMouse = event.x
@@ -481,8 +482,8 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw( state:State):
-        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
-        # print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
+        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
+        #print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
@@ -490,7 +491,8 @@ class MapVizualization(tk.Tk):
         MapVizualization.iAgent = state.car_coordinates.axis0
         MapVizualization.jAgent = state.car_coordinates.axis1
         MapVizualization.agentDirection = state.current_direction
-        # print(f"current direction is {state.current_direction}")
-        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
+        MapVizualization.agentLaneNumber = state.current_lane
+        print(f"current lane number is is {state.current_lane}")
+        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 
