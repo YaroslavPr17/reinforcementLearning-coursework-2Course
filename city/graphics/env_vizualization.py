@@ -89,7 +89,7 @@ class MapVizualization(tk.Tk):
             self.horizontal = self.vertical
         else:
             self.vertical = self.horizontal
-        self.wp = self.vertical / 10
+        self.wp = self.vertical / 6
 
     def idxToX(self, idx):
         return idx * self.horizontal
@@ -490,7 +490,7 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw( state:State):
-        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
         #print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
@@ -501,7 +501,7 @@ class MapVizualization(tk.Tk):
         MapVizualization.agentDirection = state.current_direction
         MapVizualization.agentLaneNumber = state.current_lane
         MapVizualization.agentPosition = 0
-        print(f"current lane number is is {state.current_lane}")
-        print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
+        # print(f"current lane number is is {state.current_lane}")
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  //////")
 
 
