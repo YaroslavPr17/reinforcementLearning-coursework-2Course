@@ -32,6 +32,12 @@ class Agent:
     layout_sample : int,
         The ordinal number of layout which describes the current map sample
 
+    graphics : bool,
+        Whether demo-Agent is needed. Requires passing 'delay'-parameter.
+
+    delay : int,
+        The number of seconds between every movement.
+
     Attributes
     ----------
     env : City,
@@ -45,17 +51,18 @@ class Agent:
             which define a policy.
     """
 
-    def __init__(self, map_sample: int = 0, layout_sample: int = 0, graphics: bool = True):
+    def __init__(self, map_sample: int = 0, layout_sample: int = 0, graphics: bool = True, delay: float = 1):
         self.env = City(map_sample, layout_sample)
 
         self.q_table: dict[State, list[int]] = \
             {state: [0 for _ in range(len(actions))] for state in self.env.P.keys()}
 
         self.state = self.env.reset()
+        self.delay = delay
 
         self.is_demo = graphics
-        if graphics:
-            self.visualizer = Visualizer(self.env)
+        if self.is_demo:
+            self.visualizer = Visualizer(self.env, self.delay)
             self.visualizer.start()
 
     def training_session(self,
@@ -68,11 +75,9 @@ class Agent:
 
         Parameters
         ----------
-        unvisited_states : list
-            The list of numbers of unvisited states over the whole learning process.
-
-        partially_visited_states : list
-            The list of numbers of partially visited states over the whole learning process.
+        statistics : namedtuple
+            Provides fields containing numbers of unvisited states over the whole learning process,
+                partially visited states over the whole learning process and number of episodes used.
 
         n_episodes : int, default=100,
             The number of random episodes to learn
@@ -244,7 +249,7 @@ class Agent:
                 self.state = next_state
                 self.env.state = next_state
                 if self.is_demo:
-                    sleep(3)
+                    sleep(self.delay)
             print(f"Episode {episode}: {sum_reward = }")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
         print(f"{cycled = }")

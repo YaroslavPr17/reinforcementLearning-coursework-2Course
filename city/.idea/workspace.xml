@@ -6,15 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="985dc904-39bf-4c83-a543-dfbe27179149" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/_game-checkpoint.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/demo-checkpoint.ipynb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent/agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent/agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Environment/.model_with_intersections_and_lanes(with dynamic lanes).txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Environment/raw_data/roads_descriptor.py" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/raw_data/roads_descriptor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/_agent_test.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/_game.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/demo.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/visualization_test.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Environment/map_models/map5 - Copymodel.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/_debug.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/_debug.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/env_vizualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/env_vizualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/visual_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/graphics/visual_process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,7 +40,7 @@
       <recent name="D:\GitHub_personal\Reinforcement-Learning_Coursework---2-course\city\Environment" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.visualization_test (1)">
+  <component name="RunManager" selected="Python.main">
     <configuration name="env_vizualization (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="city" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -58,28 +55,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/env_vizualization.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="env_vizualization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="city" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Environment/Visualization" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:\GitHub_personal\Reinforcement-Learning_Coursework---2-course\city\env_vizualization.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -124,6 +99,27 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="D:\GitHub_personal\Reinforcement-Learning_Coursework---2-course\city\Visualization\env_vizualization.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="city" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -193,10 +189,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.main" />
         <item itemvalue="Python.visualization_test (1)" />
         <item itemvalue="Python tests.Python tests in visualization_test.py" />
         <item itemvalue="Python.visualization_test" />
-        <item itemvalue="Python.env_vizualization (1)" />
         <item itemvalue="Python.env_vizualization (1)" />
       </list>
     </recent_temporary>
