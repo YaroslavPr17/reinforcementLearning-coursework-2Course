@@ -88,7 +88,7 @@ class MapVizualization(tk.Tk):
             self.horizontal = self.vertical
         else:
             self.vertical = self.horizontal
-        self.wp = self.vertical / 10
+        self.wp = self.vertical / 6
 
     def idxToX(self, idx):
         return idx * self.horizontal
@@ -169,12 +169,8 @@ class MapVizualization(tk.Tk):
             # количество полос сверху
             leftTopCount = getLeftCount(verticalIdx, horizontalIdx)
             rightTopCount = getRightCount(verticalIdx, horizontalIdx)
-            leftBottomCount = getLeftCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1,
-                                                                                     horizontalIdx) else getLeftCount(
-                verticalIdx, horizontalIdx)
-            rightBottomCount = getRightCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1,
-                                                                                       horizontalIdx) else getRightCount(
-                verticalIdx, horizontalIdx)
+            leftBottomCount = getLeftCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1, horizontalIdx) else getLeftCount(verticalIdx, horizontalIdx)
+            rightBottomCount = getRightCount(verticalIdx + 1, horizontalIdx) if isRoad(verticalIdx + 1, horizontalIdx) else getRightCount(verticalIdx, horizontalIdx)
 
             # координаты для травы
             xLeftTopGrass = xLeft + self.wp * leftTopCount * self.scale
@@ -211,9 +207,6 @@ class MapVizualization(tk.Tk):
             rightTopCount = getRightCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getRightCount(verticalIdx, horizontalIdx)
             rightBottomCount = getLeftCount(verticalIdx, horizontalIdx + 1) if isRoad(verticalIdx, horizontalIdx + 1) else getLeftCount(verticalIdx, horizontalIdx)
 
-
-
-
             # координаты для травы
             yLeftTopGrass = yTop + self.wp * leftTopCount * self.scale
             yRightTopGrass = yTop + self.wp * rightTopCount * self.scale
@@ -249,7 +242,6 @@ class MapVizualization(tk.Tk):
 
     def drawAgent(self):
         def draw_destonation_point(x, y):
-            # print(x, y)
             yTop = y - (4 * self.wp) * self.scale
             yBottom = y - (1 * self.wp) * self.scale
             xRight = x + (3 * self.wp) * self.scale
@@ -262,11 +254,6 @@ class MapVizualization(tk.Tk):
             drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 3 * self.scale))
 
         def draw_wehicle(x, y,):
-            # xLeft = x - (0.5 *self.wp) *self.scale
-            # xRight = x + (0.5 *self.wp) *self.scale
-            # yTop = y - (0.5 * self.wp) * self.scale
-            # yBottom = y + (0.5 * self.wp) * self.scale
-            # drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "N":
                 xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
@@ -337,11 +324,8 @@ class MapVizualization(tk.Tk):
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
 
-
-
             if MapVizualization.hasFinish and MapVizualization.iFinish == verticalIdx and MapVizualization.jFinish == horizontalIdx:
                 draw_destonation_point(xCenter, yCenter)
-
 
             if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
                 draw_wehicle(xCenter, yCenter)
@@ -363,20 +347,18 @@ class MapVizualization(tk.Tk):
             newX0 = 0
         if(self.horizontalWindow * self.scale - abs(newX0) < self.horizontalWindow):
             newX0 = self.horizontalWindow - self.horizontalWindow * self.scale
-
         newY0 = self.y0 + y - self.yMouse
         if(newY0 > 0):
             newY0 = 0
         if(self.verticalWindow * self.scale - abs(newY0) < self.verticalWindow):
             newY0 = self.verticalWindow - self.verticalWindow * self.scale
-
         self.x0 = newX0
         self.y0 = newY0
         self.drawContent()
         self.drawAgent()
 
     def canvas_mouseWheel_event(self, event):
-        # respond to Linux or Windows wheel event
+
         if event.num == 5 or event.delta == -120:
             if self.scale > 1:
                 self.scale -= 0.1
@@ -393,7 +375,6 @@ class MapVizualization(tk.Tk):
             self.updateContent(event.x, event.y)
         self.xMouse = event.x
         self.yMouse = event.y
-        # print('Motion: ', event.x, event.y)
 
     def canvas_buttonPress_event(self, event):
         self.something_clicked = 0  
@@ -401,13 +382,11 @@ class MapVizualization(tk.Tk):
             self.moveMode = True
         self.xMouse = event.x
         self.yMouse = event.y
-        print('ButtonPress: ', event.x, event.y)
 
     def canvas_buttonRelease_event(self, event):
         self.something_clicked = 0
         self.moveMode = False
         self.updateContent(event.x, event.y)
-        print('ButtonRelease: ', event.x, event.y)
 
     def canvas_resize_event(self, event):
         self.horizontalWindow, self.verticalWindow = event.width, event.height
