@@ -50,7 +50,10 @@ class MapVizualization(tk.Tk):
     horizontalWindow = 2560 // 3 * 2
     verticalWindow = 1440 // 3 * 2
 
-    def __init__(self, env: City):
+    def __init__(self, env: City, delay: float):
+        print("DELAY", delay)
+
+
         super().__init__()
 
         self.title("env_visualization")
@@ -414,6 +417,8 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw(state: State):
+        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
+        #print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
@@ -423,3 +428,4 @@ class MapVizualization(tk.Tk):
         MapVizualization.agentDirection = state.current_direction
         MapVizualization.agentLaneNumber = state.current_lane
         MapVizualization.agentPosition = 0
+

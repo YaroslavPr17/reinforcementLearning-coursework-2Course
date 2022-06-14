@@ -1,5 +1,8 @@
+import math
 import sys
+import time
 from time import sleep
+from collections import namedtuple
 
 import dill as pickle
 from tqdm import tqdm
@@ -29,6 +32,12 @@ class Agent:
     layout_sample : int,
         The ordinal number of layout which describes the current map sample
 
+    graphics : bool,
+        Whether demo-Agent is needed. Requires passing 'delay'-parameter.
+
+    delay : int,
+        The number of seconds between every movement.
+
     Attributes
     ----------
     env : City,
@@ -42,24 +51,34 @@ class Agent:
             which define a policy.
     """
 
-    def __init__(self, map_sample: int = 0, layout_sample: int = 0):
+    def __init__(self, map_sample: int = 0, layout_sample: int = 0, graphics: bool = True, delay: float = 1):
         self.env = City(map_sample, layout_sample)
 
         self.q_table: dict[State, list[int]] = \
             {state: [0 for _ in range(len(actions))] for state in self.env.P.keys()}
 
         self.state = self.env.reset()
+        self.delay = delay
 
-        self.visualizer = Visualizer(self.env)
-        self.visualizer.start()
-        # self.visualizer.join()
+        self.is_demo = graphics
+        if self.is_demo:
+            self.visualizer = Visualizer(self.env, self.delay)
+            self.visualizer.start()
 
-    def train(self, n_episodes: int = 100, alpha: float = 0.7, gamma: float = 0.7, epsilon: float = 0.8) -> None:
+    def training_session(self,
+                         statistics: namedtuple("Statistics", "unvisited_states partially_visited_states episodes_count"),
+                         n_episodes: int = 100000,
+                         alpha: float = 0.7, gamma: float = 0.7, epsilon: float = 0.8,
+                         ) -> None:
         """
         Performs a learning session which modifies agent's q_table and builds a behavioural policy.
 
         Parameters
         ----------
+        statistics : namedtuple
+            Provides fields containing numbers of unvisited states over the whole learning process,
+                partially visited states over the whole learning process and number of episodes used.
+
         n_episodes : int, default=100,
             The number of random episodes to learn
 
@@ -82,7 +101,12 @@ class Agent:
         -------
         None - since the Agent's attribute is changed.
         """
+
+        print(f"{alpha=} | {gamma=} | {epsilon=}")
+        start_time = time.time()
+
         for episode in tqdm(range(n_episodes), file=sys.stdout):
+
             self.state = self.env.reset()
 
             is_done = False
@@ -124,6 +148,59 @@ class Agent:
 
             # print(f"Episode {episode}: {sum_reward = }")
 
+        whole_zero = 0
+        any_zero = 0
+        for el in self.q_table.values():
+            if all(map(lambda a: a == INITIAL_Q_VALUE, el)):
+                whole_zero += 1
+            if INITIAL_Q_VALUE in el:
+                any_zero += 1
+        statistics.unvisited_states.append(whole_zero)
+        statistics.partially_visited_states.append(any_zero)
+        statistics.episodes_count.append(n_episodes)
+        finish_time = time.time()
+        print(f"Wall time: {np.round(float(finish_time - start_time), 2)} seconds.\n")
+
+    def train(self) -> namedtuple("Statistics", "unvisited_states partially_visited_states episodes_count"):
+        Stat = namedtuple("Statistics", "unvisited_states partially_visited_states episodes_count")
+        stat = Stat([], [], [0])
+
+        whole_zero = 0
+        any_zero = 0
+        for el in self.q_table.values():
+            if all(map(lambda a: a == INITIAL_Q_VALUE, el)):
+                whole_zero += 1
+            if INITIAL_Q_VALUE in el:
+                any_zero += 1
+        stat.unvisited_states.append(whole_zero)
+        stat.partially_visited_states.append(any_zero)
+        print("Overall number of states =", whole_zero)
+
+        start_training_time = time.time()
+
+        self.training_session(stat, 300000, alpha=1, gamma=0.9, epsilon=1)
+        self.training_session(stat, 200000, alpha=1, gamma=0.9, epsilon=1)
+
+        self.training_session(stat, 120000, alpha=0.7, gamma=0.9, epsilon=0.9)
+        self.training_session(stat, 140000, alpha=0.5, gamma=0.9, epsilon=0.8)
+        self.training_session(stat, 160000, alpha=0.35, gamma=0.9, epsilon=0.7)
+
+        self.training_session(stat, 200000, alpha=0.3, gamma=0.9, epsilon=0.6)
+        self.training_session(stat, 200000, alpha=0.3, gamma=0.9, epsilon=0.6)
+
+        self.training_session(stat, 400000, alpha=0.3, gamma=0.9, epsilon=0.1)
+        self.training_session(stat, 200000, alpha=0.3, gamma=0.9, epsilon=0.1)
+
+        finish_training_time = time.time()
+
+        print("Overall training time:", np.round(float(finish_training_time - start_training_time), 2), "seconds.")
+        print("Numbers of unvisited states:\n", stat.unvisited_states)
+        print("Numbers of partially visited states:\n", stat.partially_visited_states)
+
+        self.finalize()
+
+        return stat
+
     def perform(self, n_episodes: int = 100):
         """
         Test agent's performance on n_episodes different initial states and prints the number of successful and
@@ -131,17 +208,20 @@ class Agent:
         """
         n_successful_trials = 0
         next_to_border = 0
+        cycled = 0
         for episode in range(n_episodes):
             self.state = self.env.reset()
-            print('INITIAL STATE:\n', self.state)
+            # print('INITIAL STATE:\n', self.state)
 
             is_done = False
 
             sum_reward = 0
 
+            time_value = time.time()
+
             while not is_done:
                 # Graphic test callback
-                # MapVizualization.callback_agent_draw(self.state)
+                MapVizualization.callback_agent_draw(self.state)
 
                 if isinstance(np.argmax(self.q_table[self.state]), np.int64):
                     action = np.argmax(self.q_table[self.state])
@@ -151,8 +231,13 @@ class Agent:
                 next_state: State
                 next_state, reward, is_done = self.env.step(action)
 
-                print(f'{action = }, lane = {next_state.current_lane}')
-                print(list(self.q_table[self.state]), end='\n\n')
+                # print(f'{action = }, lane = {next_state.current_lane}')
+                # print(list(self.q_table[self.state]), end='\n\n')
+
+                if not self.is_demo and time.time() - time_value > 1.5:
+                    sum_reward = -10000
+                    cycled += 1
+                    break
 
                 if next_state.car_coordinates.axis0 == next_state.destination_coordinates.axis0 and \
                         next_state.car_coordinates.axis1 == next_state.destination_coordinates.axis1:
@@ -163,10 +248,11 @@ class Agent:
                 sum_reward += reward
                 self.state = next_state
                 self.env.state = next_state
-                MapVizualization.callback_agent_draw(self.state)
-                sleep(3)
-            print(f"Episode {episode}: {sum_reward = }\n\n")
+                if self.is_demo:
+                    sleep(self.delay)
+            print(f"Episode {episode}: {sum_reward = }")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
+        print(f"{cycled = }")
 
     def reset(self) -> None:
         """
@@ -268,4 +354,3 @@ class Agent:
             for n_a in actions:
                 if self.q_table[state][n_a] == 0:
                     self.q_table[state][n_a] = MIN_REWARD
-

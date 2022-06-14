@@ -11,6 +11,7 @@ actions = namedtuple('Actions', h_actions)(*np.arange(len(h_actions)))
 
 MAX_N_LANES = 5
 MIN_REWARD = -1_000_000
+INITIAL_Q_VALUE = 0
 
 next_direction = {'N': ['N', 'W', 'E', 'N', 'N', 'N', 'S'],
                   'W': ['W', 'S', 'N', 'W', 'W', 'W', 'E'],
@@ -65,7 +66,6 @@ rewards = Rewards(
     tricky_turn=-20000,
     turn_to_appropriate_direction=500,
 
-
     basic_forward=-250,
     forward_in_correct_direction=+260,
 
@@ -89,3 +89,5 @@ closest['N'] = ('NW', 'N', 'NE')
 closest['W'] = ('W', 'NW', 'SW')
 closest['E'] = ('SE', 'NE', 'E')
 closest['S'] = ('SW', 'S', 'SE')
+
+map_models_folder_name = 'map_models'
