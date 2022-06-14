@@ -171,8 +171,6 @@ class Agent:
         stat.partially_visited_states.append(any_zero)
         print("Overall number of states =", whole_zero)
 
-
-
         start_training_time = time.time()
 
         self.training_session(stat, 300000, alpha=1, gamma=0.9, epsilon=1)
@@ -205,6 +203,7 @@ class Agent:
         """
         n_successful_trials = 0
         next_to_border = 0
+        cycled = 0
         for episode in range(n_episodes):
             self.state = self.env.reset()
             # print('INITIAL STATE:\n', self.state)
@@ -212,6 +211,8 @@ class Agent:
             is_done = False
 
             sum_reward = 0
+
+            time_value = time.time()
 
             while not is_done:
                 # Graphic test callback
@@ -228,6 +229,11 @@ class Agent:
                 # print(f'{action = }, lane = {next_state.current_lane}')
                 # print(list(self.q_table[self.state]), end='\n\n')
 
+                if not self.is_demo and time.time() - time_value > 1.5:
+                    sum_reward = -10000
+                    cycled += 1
+                    break
+
                 if next_state.car_coordinates.axis0 == next_state.destination_coordinates.axis0 and \
                         next_state.car_coordinates.axis1 == next_state.destination_coordinates.axis1:
                     if next_state.current_lane == 0:
@@ -241,6 +247,7 @@ class Agent:
                     sleep(3)
             print(f"Episode {episode}: {sum_reward = }")
         print(f"{n_successful_trials}/{n_episodes} objects reached their destination. Where {next_to_border = }")
+        print(f"{cycled = }")
 
     def reset(self) -> None:
         """
