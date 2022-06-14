@@ -9,8 +9,9 @@ class Visualizer(threading.Thread):
         super().__init__()
         self.env = env
         self.delay = delay
+        self.map_visualization = None
 
     def run(self) -> None:
-        map_visualization = MapVizualization(self.env, self.delay)
-        map_visualization.mainloop()
-        map_visualization.clear()
+        self.map_visualization: MapVizualization = MapVizualization(self.env, self.delay)
+        self.map_visualization.mainloop()
+        self.map_visualization.clear()
