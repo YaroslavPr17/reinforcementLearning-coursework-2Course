@@ -201,7 +201,7 @@ class Agent:
 
         return stat
 
-    def perform(self, n_episodes: int = 100):
+    def perform(self, n_episodes: int = 100) -> object:
         """
         Test agent's performance on n_episodes different initial states and prints the number of successful and
         absolutely successful trials.

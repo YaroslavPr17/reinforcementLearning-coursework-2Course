@@ -262,7 +262,7 @@ class MapVizualization(tk.Tk):
             drawAgent.polygon((points), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
             drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 3 * self.scale))
 
-        def draw_wehicle(x, y,):
+        def draw_vehicle(x, y,):
             # xLeft = x - (0.5 *self.wp) *self.scale
             # xRight = x + (0.5 *self.wp) *self.scale
             # yTop = y - (0.5 * self.wp) * self.scale
@@ -345,7 +345,7 @@ class MapVizualization(tk.Tk):
 
 
             if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
-                draw_wehicle(xCenter, yCenter)
+                draw_vehicle(xCenter, yCenter)
 
         imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
         drawAgent = aggdraw.Draw(imageAgent)
