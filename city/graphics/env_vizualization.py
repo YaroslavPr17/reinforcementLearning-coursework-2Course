@@ -63,6 +63,8 @@ class MapVizualization(tk.Tk):
 
         self.city = env
         self.delay = delay
+        self.isIntersection = False
+        self.isGround = False
 
         self.setBlockSize()
         self.drawContent()
@@ -234,6 +236,8 @@ class MapVizualization(tk.Tk):
         for i in range(self.city.shape[0]):
             for j in range(self.city.shape[1]):
                 if (isinstance(self.city.city_model[i][j], Road)):
+                    self.isIntersection = False
+                    self.isGround = False
                     if (self.city.city_model[i][j].orientation == "v"):
                         drawVerticalRoad(j, i)
                     else:
@@ -241,8 +245,12 @@ class MapVizualization(tk.Tk):
 
                 elif (isinstance(self.city.city_model[i][j], Intersection)):
                     drawIntersection(j, i)
+                    self.isIntersection = True
+                    self.isGround = False
                 else:
                     drawGround(j, i)
+                    self.isIntersection = False
+                    self.isGround = True
 
         draw.flush()
         self.tk_image = ImageTk.PhotoImage(image)
@@ -263,12 +271,6 @@ class MapVizualization(tk.Tk):
             drawAgent.line((x, y, x, yTop), aggdraw.Pen("black", 3 * self.scale))
 
         def draw_vehicle(x, y,):
-            # xLeft = x - (0.5 *self.wp) *self.scale
-            # xRight = x + (0.5 *self.wp) *self.scale
-            # yTop = y - (0.5 * self.wp) * self.scale
-            # yBottom = y + (0.5 * self.wp) * self.scale
-            # drawAgent.rectangle((xLeft, yTop, xRight, yBottom), aggdraw.Pen("red", 0.5), aggdraw.Brush("red"))
-
             if MapVizualization.agentDirection == "N":
                 xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 xRight = x + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
@@ -276,6 +278,11 @@ class MapVizualization(tk.Tk):
                 yTop = y - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
                 yMiddle = y - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
                 yBottom = y + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
+
+                if self.isIntersection or self.isGround:
+                    yTop = yTop + 5 * self.wp * self.scale
+                    yMiddle = yMiddle + 5 * self.wp * self.scale
+                    yBottom = yBottom + 5 * self.wp * self.scale
 
                 points = [xLeft, yBottom,
                           xLeft, yMiddle,
@@ -292,6 +299,11 @@ class MapVizualization(tk.Tk):
                 yMiddle = y + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
                 yBottom = y + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
 
+                if self.isIntersection or self.isGround:
+                    yTop = yTop - 5 * self.wp * self.scale
+                    yMiddle = yMiddle - 5 * self.wp * self.scale
+                    yBottom = yBottom - 5 * self.wp * self.scale
+
                 points = [xLeft, yMiddle,
                           xLeft, yTop,
                           xRight, yTop,
@@ -307,6 +319,11 @@ class MapVizualization(tk.Tk):
                 yMiddle = y - (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
 
+                if self.isIntersection or self.isGround:
+                    xLeft = xLeft + 5 * self.wp * self.scale
+                    xRight = xRight + 5 * self.wp * self.scale
+                    xMiddle = xMiddle + 5 * self.wp * self.scale
+
                 points = [xLeft, yMiddle,
                           xMiddle, yTop,
                           xRight, yTop,
@@ -321,6 +338,11 @@ class MapVizualization(tk.Tk):
                 yTop = y + (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yMiddle = y + (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
+
+                if self.isIntersection or self.isGround:
+                    xLeft = xLeft - 5 * self.wp * self.scale
+                    xRight = xRight - 5 * self.wp * self.scale
+                    xMiddle = xMiddle - 5 * self.wp * self.scale
 
                 points = [xLeft, yTop,
                           xMiddle, yTop,
@@ -338,11 +360,8 @@ class MapVizualization(tk.Tk):
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
 
-
-
             if MapVizualization.hasFinish and MapVizualization.iFinish == verticalIdx and MapVizualization.jFinish == horizontalIdx:
                 draw_destonation_point(xCenter, yCenter)
-
 
             if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
                 draw_vehicle(xCenter, yCenter)
@@ -418,8 +437,6 @@ class MapVizualization(tk.Tk):
 
     @staticmethod
     def callback_agent_draw(state: State):
-        # print(r"ВЫВОД ДЛЯ ГРАФИКИ!!! -----------------------------------------  \\\\\\")
-        #print(f'state status : {state} \n\n agent destonation coordinate x is {state.destination_coordinates[0]}, agent destonation coordinates y is {state.destination_coordinates[1]}')
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
