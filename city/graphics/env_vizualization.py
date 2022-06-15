@@ -20,7 +20,7 @@ class ThreadUpdater(Thread):
         while self.map.running:
             self.map.drawAgent()
             MapVizualization.agentPosition = MapVizualization.agentPosition + 1
-            sleep(0.125)
+            sleep(1 / 8)
 
 
 class MapVizualization(tk.Tk):
@@ -62,6 +62,7 @@ class MapVizualization(tk.Tk):
         self.canvas.pack(expand=1, fill=tk.BOTH)
 
         self.city = env
+        self.delay = delay
 
         self.setBlockSize()
         self.drawContent()
@@ -272,9 +273,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 xRight = x + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
                 xMiddle = x + (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
-                yMiddle = y - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
-                yBottom = y + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / 24)) * self.scale
+                yTop = y - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
+                yMiddle = y - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
+                yBottom = y + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
 
                 points = [xLeft, yBottom,
                           xLeft, yMiddle,
@@ -287,9 +288,9 @@ class MapVizualization(tk.Tk):
                 xLeft = x - (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 xRight = x - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
                 xMiddle = x - (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
-                yMiddle = y + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
-                yBottom = y + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / 24)) * self.scale
+                yTop = y - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
+                yMiddle = y + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
+                yBottom = y + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 8))) * self.scale
 
                 points = [xLeft, yMiddle,
                           xLeft, yTop,
@@ -299,9 +300,9 @@ class MapVizualization(tk.Tk):
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "W":
-                xLeft = x - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
-                xRight = x + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
-                xMiddle = x - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xLeft = x - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
+                xRight = x + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
+                xMiddle = x - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
                 yTop = y - (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yMiddle = y - (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
@@ -314,9 +315,9 @@ class MapVizualization(tk.Tk):
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
             if MapVizualization.agentDirection == "E":
-                xLeft = x - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
-                xRight = x + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
-                xMiddle = x + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / 24)) * self.scale
+                xLeft = x - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
+                xRight = x + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
+                xMiddle = x + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 8))) * self.scale
                 yTop = y + (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yMiddle = y + (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
                 yBottom = y + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
