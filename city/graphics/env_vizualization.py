@@ -375,24 +375,19 @@ class MapVizualization(tk.Tk):
                           xLeft, yBottom]
                 drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
 
-        def drawBlock(horizontalIdx, verticalIdx):
-            xLeft = self.x0 + self.idxToX(horizontalIdx) * self.scale
-            xRight = self.x0 + self.idxToX(horizontalIdx + 1) * self.scale
-            yTop = self.y0 + self.idxToY(verticalIdx) * self.scale
-            yBottom = self.y0 + self.idxToY(verticalIdx + 1) * self.scale
+        imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
+        drawAgent = aggdraw.Draw(imageAgent)
+
+        if MapVizualization.hasAgent:
+            xLeft = self.x0 + self.idxToX(MapVizualization.jAgent) * self.scale
+            xRight = self.x0 + self.idxToX(MapVizualization.jAgent + 1) * self.scale
+            yTop = self.y0 + self.idxToY(MapVizualization.iAgent) * self.scale
+            yBottom = self.y0 + self.idxToY(MapVizualization.iAgent + 1) * self.scale
 
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
 
-            if MapVizualization.hasAgent and MapVizualization.iAgent == verticalIdx and MapVizualization.jAgent == horizontalIdx:
-                draw_vehicle(xCenter, yCenter)
-
-        imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
-        drawAgent = aggdraw.Draw(imageAgent)
-
-        for i in range(self.city.shape[0]):
-            for j in range(self.city.shape[1]):
-                drawBlock(j, i)
+            draw_vehicle(xCenter, yCenter)
 
         drawAgent.flush()
         self.tk_imageAgent = ImageTk.PhotoImage(imageAgent)
