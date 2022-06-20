@@ -25,8 +25,9 @@ class ThreadUpdater(Thread):
                 jF = MapVizualization.jFinish
                 self.map.drawContent()
             self.map.drawAgent()
-            MapVizualization.agentPosition = MapVizualization.agentPosition + 4
-            sleep(1 / 25)
+            if MapVizualization.hasAgent and (isinstance(MapVizualization.city.city_model[MapVizualization.iAgent][MapVizualization.jAgent], Road)):
+                MapVizualization.agentPosition = MapVizualization.agentPosition + 1
+            sleep(MapVizualization.delay)
 
 
 class MapVizualization(tk.Tk):
@@ -59,7 +60,6 @@ class MapVizualization(tk.Tk):
     def __init__(self, env: City, delay: float):
         print("DELAY", delay)
 
-
         super().__init__()
 
         self.title("env_visualization")
@@ -67,10 +67,9 @@ class MapVizualization(tk.Tk):
         self.canvas = Canvas(self, width=self.horizontalWindow, height=self.verticalWindow, bg="#247719")
         self.canvas.pack(expand=1, fill=tk.BOTH)
 
-        self.city = env
-        self.delay = delay
-        self.isIntersection = False
-        self.isGround = False
+        MapVizualization.city = env
+        self.drawAgentCount = 25
+        MapVizualization.delay = delay / self.drawAgentCount
 
         self.setBlockSize()
         self.drawContent()
@@ -91,8 +90,8 @@ class MapVizualization(tk.Tk):
         self.thread.join()
 
     def setBlockSize(self):
-        self.vertical = self.verticalWindow / self.city.shape[0]
-        self.horizontal = self.horizontalWindow / self.city.shape[1]
+        self.vertical = self.verticalWindow / MapVizualization.city.shape[0]
+        self.horizontal = self.horizontalWindow / MapVizualization.city.shape[1]
         if self.vertical < self.horizontal:
             self.horizontal = self.vertical
         else:
@@ -135,13 +134,13 @@ class MapVizualization(tk.Tk):
                 i = i + 1
 
         def isRoad(i, j):
-            return ((i > 0) and (i <= self.city.shape[0]) and (j > 0) and (j <= self.city.shape[1]) and (isinstance(self.city.city_model[i][j], Road)))
+            return ((i > 0) and (i <= MapVizualization.city.shape[0]) and (j > 0) and (j <= MapVizualization.city.shape[1]) and (isinstance(MapVizualization.city.city_model[i][j], Road)))
 
         def getLeftCount(i, j):
-            return [len(value) for key, value in self.city.city_model[i][j].lanes.items()][1]
+            return [len(value) for key, value in MapVizualization.city.city_model[i][j].lanes.items()][1]
 
         def getRightCount(i, j):
-            return [len(value) for key, value in self.city.city_model[i][j].lanes.items()][0]
+            return [len(value) for key, value in MapVizualization.city.city_model[i][j].lanes.items()][0]
 
         def draw_destonation_point(x, y):
             # print(x, y)
@@ -269,24 +268,18 @@ class MapVizualization(tk.Tk):
         image = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (36, 119, 25, 1))
         draw = aggdraw.Draw(image)
 
-        for i in range(self.city.shape[0]):
-            for j in range(self.city.shape[1]):
-                if (isinstance(self.city.city_model[i][j], Road)):
-                    self.isIntersection = False
-                    self.isGround = False
-                    if (self.city.city_model[i][j].orientation == "v"):
+        for i in range(MapVizualization.city.shape[0]):
+            for j in range(MapVizualization.city.shape[1]):
+                if (isinstance(MapVizualization.city.city_model[i][j], Road)):
+                    if (MapVizualization.city.city_model[i][j].orientation == "v"):
                         drawVerticalRoad(j, i)
                     else:
                         drawHorizontalRoad(j, i)
 
-                elif (isinstance(self.city.city_model[i][j], Intersection)):
+                elif (isinstance(MapVizualization.city.city_model[i][j], Intersection)):
                     drawIntersection(j, i)
-                    self.isIntersection = True
-                    self.isGround = False
                 else:
                     drawGround(j, i)
-                    self.isIntersection = False
-                    self.isGround = True
 
         draw.flush()
         self.tk_image = ImageTk.PhotoImage(image)
@@ -294,91 +287,7 @@ class MapVizualization(tk.Tk):
 
     def drawAgent(self):
 
-        def draw_vehicle(x, y,):
-            if MapVizualization.agentDirection == "N":
-                xLeft = x + (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                xRight = x + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
-                xMiddle = x + (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-                yMiddle = y - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-                yBottom = y + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-
-                if self.isIntersection or self.isGround:
-                    yTop = yTop + 5 * self.wp * self.scale
-                    yMiddle = yMiddle + 5 * self.wp * self.scale
-                    yBottom = yBottom + 5 * self.wp * self.scale
-
-                points = [xLeft, yBottom,
-                          xLeft, yMiddle,
-                          xMiddle, yTop,
-                          xRight, yMiddle,
-                          xRight, yBottom]
-                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
-
-            if MapVizualization.agentDirection == "S":
-                xLeft = x - (self.horizontal * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                xRight = x - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
-                xMiddle = x - (self.horizontal * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yTop = y - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-                yMiddle = y + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-                yBottom = y + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.vertical / (self.delay * 50))) * self.scale
-
-                if self.isIntersection or self.isGround:
-                    yTop = yTop - 5 * self.wp * self.scale
-                    yMiddle = yMiddle - 5 * self.wp * self.scale
-                    yBottom = yBottom - 5 * self.wp * self.scale
-
-                points = [xLeft, yMiddle,
-                          xLeft, yTop,
-                          xRight, yTop,
-                          xRight, yMiddle,
-                          xMiddle, yBottom]
-                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
-
-            if MapVizualization.agentDirection == "W":
-                xLeft = x - (1.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                xRight = x + (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                xMiddle = x - (0.5 * self.wp) * self.scale - (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                yTop = y - (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yMiddle = y - (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yBottom = y - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
-
-                if self.isIntersection or self.isGround:
-                    xLeft = xLeft + 5 * self.wp * self.scale
-                    xRight = xRight + 5 * self.wp * self.scale
-                    xMiddle = xMiddle + 5 * self.wp * self.scale
-
-                points = [xLeft, yMiddle,
-                          xMiddle, yTop,
-                          xRight, yTop,
-                          xRight, yBottom,
-                          xMiddle, yBottom]
-                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
-
-            if MapVizualization.agentDirection == "E":
-                xLeft = x - (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                xRight = x + (1.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                xMiddle = x + (0.5 * self.wp) * self.scale + (self.agentPosition * (self.horizontal / (self.delay * 50))) * self.scale
-                yTop = y + (self.vertical * 0.5 - 1 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yMiddle = y + (self.vertical * 0.5 - 0.5 * self.wp - self.agentLaneNumber * self.wp) * self.scale
-                yBottom = y + (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
-
-                if self.isIntersection or self.isGround:
-                    xLeft = xLeft - 5 * self.wp * self.scale
-                    xRight = xRight - 5 * self.wp * self.scale
-                    xMiddle = xMiddle - 5 * self.wp * self.scale
-
-                points = [xLeft, yTop,
-                          xMiddle, yTop,
-                          xRight, yMiddle,
-                          xMiddle, yBottom,
-                          xLeft, yBottom]
-                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
-
-        imageAgent = Image.new("RGBA", (self.horizontalWindow, self.verticalWindow), (0, 0, 0, 0))
-        drawAgent = aggdraw.Draw(imageAgent)
-
-        if MapVizualization.hasAgent:
+        def getCenter():
             xLeft = self.x0 + self.idxToX(MapVizualization.jAgent) * self.scale
             xRight = self.x0 + self.idxToX(MapVizualization.jAgent + 1) * self.scale
             yTop = self.y0 + self.idxToY(MapVizualization.iAgent) * self.scale
@@ -387,11 +296,85 @@ class MapVizualization(tk.Tk):
             xCenter = xLeft + (xRight - xLeft) // 2
             yCenter = yTop + (yBottom - yTop) // 2
 
-            draw_vehicle(xCenter, yCenter)
+            return xCenter, yCenter
 
-        drawAgent.flush()
-        self.tk_imageAgent = ImageTk.PhotoImage(imageAgent)
-        self.canvas.create_image((0, 0), anchor='nw', image=self.tk_imageAgent)
+        def getAgentCanvas(x, y):
+            if MapVizualization.agentDirection == "N":
+                xLeft = x + (self.horizontal * 0.5 - (self.agentLaneNumber + 1) * self.wp) * self.scale
+                yTop = y - (self.vertical // self.drawAgentCount * MapVizualization.agentPosition + self.wp) * self.scale
+                return xLeft, yTop, round(self.wp * self.scale), round(self.wp * 2 * self.scale)
+
+            if MapVizualization.agentDirection == "S":
+                xLeft = x - (self.horizontal * 0.5 - self.agentLaneNumber * self.wp) * self.scale
+                yTop = y + (self.vertical // self.drawAgentCount * MapVizualization.agentPosition - self.wp) * self.scale
+                return xLeft, yTop, round(self.wp * self.scale), round(self.wp * 2 * self.scale)
+
+            if MapVizualization.agentDirection == "W":
+                yTop = y - (self.vertical * 0.5 - self.agentLaneNumber * self.wp) * self.scale
+                xLeft = x - (self.horizontal // self.drawAgentCount * MapVizualization.agentPosition + self.wp) * self.scale
+                return xLeft, yTop, round(self.wp * 2 * self.scale), round(self.wp * self.scale)
+
+            if MapVizualization.agentDirection == "E":
+                yTop = y + (self.vertical * 0.5 - (self.agentLaneNumber + 1) * self.wp) * self.scale
+                xLeft = x + (self.horizontal // self.drawAgentCount * MapVizualization.agentPosition - self.wp) * self.scale
+                return xLeft, yTop, round(self.wp * 2 * self.scale), round(self.wp * self.scale)
+
+        def draw_vehicle(width, height):
+            if MapVizualization.agentDirection == "N":
+                xMiddle = width / 2
+                yMiddle = xMiddle
+
+                points = [0, height,
+                          0, yMiddle,
+                          xMiddle, 0,
+                          width, yMiddle,
+                          width, height]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "S":
+                xMiddle = width / 2
+                yMiddle = height - xMiddle
+
+                points = [width, 0,
+                          width, yMiddle,
+                          xMiddle, height,
+                          0, yMiddle,
+                          0, 0]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "W":
+                yMiddle = height / 2
+                xMiddle = yMiddle
+
+                points = [width, height,
+                          xMiddle, height,
+                          0, yMiddle,
+                          xMiddle, 0,
+                          width, 0]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+            if MapVizualization.agentDirection == "E":
+                yMiddle = height / 2
+                xMiddle = width - yMiddle
+
+                points = [0, 0,
+                          xMiddle, 0,
+                          width, yMiddle,
+                          xMiddle, height,
+                          0, height]
+                drawAgent.polygon((points), aggdraw.Pen("black", 0.5), aggdraw.Brush("red"))
+
+        if MapVizualization.hasAgent:
+            xCenter, yCenter = getCenter()
+            xLeft, yTop, canvasWidth, canvasHeight = getAgentCanvas(xCenter, yCenter)
+
+            imageAgent = Image.new("RGBA", (canvasWidth, canvasHeight), (0, 0, 0, 0))
+            drawAgent = aggdraw.Draw(imageAgent)
+            draw_vehicle(canvasWidth, canvasHeight)
+
+            drawAgent.flush()
+            self.tk_imageAgent = ImageTk.PhotoImage(imageAgent)
+            self.canvas.create_image((xLeft, yTop), anchor='nw', image=self.tk_imageAgent)
 
     def updateContent(self, x, y):
         newX0 = self.x0 + x - self.xMouse
@@ -452,10 +435,10 @@ class MapVizualization(tk.Tk):
         MapVizualization.iFinish = state.destination_coordinates.axis0
         MapVizualization.jFinish = state.destination_coordinates.axis1
         MapVizualization.hasFinish = True
-        MapVizualization.hasAgent = True
         MapVizualization.iAgent = state.car_coordinates.axis0
         MapVizualization.jAgent = state.car_coordinates.axis1
         MapVizualization.agentDirection = state.current_direction
         MapVizualization.agentLaneNumber = state.current_lane
         MapVizualization.agentPosition = 0
+        MapVizualization.hasAgent = True
 
