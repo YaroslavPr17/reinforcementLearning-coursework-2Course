@@ -422,14 +422,12 @@ class MapVizualization(tk.Tk):
             self.scale += 0.1
             self.drawContent()
             self.drawAgent()
-        print('Scale: ', self.scale)
 
     def canvas_motion_event(self, event):
         if self.moveMode:
             self.updateContent(event.x, event.y)
         self.xMouse = event.x
         self.yMouse = event.y
-        # print('Motion: ', event.x, event.y)
 
     def canvas_buttonPress_event(self, event):
         self.something_clicked = 0  
@@ -437,13 +435,11 @@ class MapVizualization(tk.Tk):
             self.moveMode = True
         self.xMouse = event.x
         self.yMouse = event.y
-        print('ButtonPress: ', event.x, event.y)
 
     def canvas_buttonRelease_event(self, event):
         self.something_clicked = 0
         self.moveMode = False
         self.updateContent(event.x, event.y)
-        print('ButtonRelease: ', event.x, event.y)
 
     def canvas_resize_event(self, event):
         self.horizontalWindow, self.verticalWindow = event.width, event.height
