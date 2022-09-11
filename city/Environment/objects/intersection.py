@@ -8,6 +8,15 @@ n_lanes = namedtuple('LanesNumber', ['N', 'W', 'E', 'S'])
 
 
 class Intersection(Object):
+    """
+    A class for Road cell
+
+    Attributes
+    ----------
+    :param lanes: dict
+        Numbers of lanes in 4 geographical directions.
+    """
+
     def __init__(self, lanes=None):
         super().__init__()
         if lanes is None:

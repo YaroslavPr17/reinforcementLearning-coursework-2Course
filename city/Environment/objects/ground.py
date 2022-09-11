@@ -2,6 +2,10 @@ from Environment.objects.model_object import Object
 
 
 class Ground(Object):
+    """
+    A class for Ground cell
+    """
+
     def __init__(self):
         super().__init__()
         self.label = 'G'

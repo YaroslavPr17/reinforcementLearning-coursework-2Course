@@ -162,6 +162,10 @@ class Agent:
         print(f"Wall time: {np.round(float(finish_time - start_time), 2)} seconds.\n")
 
     def train(self) -> namedtuple("Statistics", "unvisited_states partially_visited_states episodes_count"):
+        """
+        Conducts training sessions with statistical data to understand coverage.
+        """
+
         Stat = namedtuple("Statistics", "unvisited_states partially_visited_states episodes_count")
         stat = Stat([], [], [0])
 
@@ -201,7 +205,7 @@ class Agent:
 
         return stat
 
-    def perform(self, n_episodes: int = 100) -> object:
+    def perform(self, n_episodes: int = 100):
         """
         Test agent's performance on n_episodes different initial states and prints the number of successful and
         absolutely successful trials.
