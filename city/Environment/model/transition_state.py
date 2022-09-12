@@ -16,7 +16,7 @@ class TransitionState:
             - 'E' - East
 
     approximate_direction: str,
-        One of 8 possible directions to define the approximate direction of agent's destination point.
+        One of 8 possible directions to define the approximate direction of Agent's destination point.
             'N', 'W', 'E', 'S', 'NE', 'NW', 'SE', 'SW'
 
     forward_available: bool,
@@ -29,7 +29,7 @@ class TransitionState:
         The flag describing whether turning right is possible.
 
     lane_type: LaneInfo,
-        The object which determines the type of lane, which agent is standing on.
+        The object which determines the type of lane, which Agent is standing on.
     """
 
     def __init__(self,

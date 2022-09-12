@@ -6,10 +6,19 @@
   <component name="ChangeListManager">
     <list default="true" id="985dc904-39bf-4c83-a543-dfbe27179149" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Agent/agent.py" beforeDir="false" afterPath="$PROJECT_DIR$/Agent/agent.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Environment/objects/ground.py" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/objects/ground.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Environment/objects/intersection.py" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/objects/intersection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Environment/objects/model_object.py" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/objects/model_object.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Environment/model/transition_state.py" beforeDir="false" afterPath="$PROJECT_DIR$/Environment/model/transition_state.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/demo_train_test.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/env_vizualization.py" beforeDir="false" afterPath="$PROJECT_DIR$/Graphics/env_vizualization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/graphics/visual_process.py" beforeDir="false" afterPath="$PROJECT_DIR$/Graphics/visual_process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/_q" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/q" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/q_t" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/q_table" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/с" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/learning_data/с_t" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -32,6 +41,8 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
@@ -173,7 +184,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="Python tests in visualization_test.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+    <configuration name="Python tests in R:/Programming/repos/reinforcementLearning-coursework-2Course/city/visualization_test.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="city" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -192,7 +203,7 @@
       <list>
         <item itemvalue="Python.main" />
         <item itemvalue="Python.visualization_test (1)" />
-        <item itemvalue="Python tests.Python tests in visualization_test.py" />
+        <item itemvalue="Python tests.Python tests in R:/Programming/repos/reinforcementLearning-coursework-2Course/city/visualization_test.py" />
         <item itemvalue="Python.visualization_test" />
         <item itemvalue="Python.env_vizualization (1)" />
       </list>

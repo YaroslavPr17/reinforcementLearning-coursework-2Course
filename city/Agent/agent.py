@@ -1,4 +1,3 @@
-import math
 import sys
 import time
 from time import sleep
@@ -12,8 +11,8 @@ from Environment.city import City
 from Environment.model.utils import *
 from Environment.model.constants import *
 from Environment.model.state import State
-from graphics.env_vizualization import MapVizualization
-from graphics.visual_process import Visualizer
+from Graphics.env_vizualization import MapVizualization
+from Graphics.visual_process import Visualizer
 
 data_filename = 'compressed_q_table'
 path_to_learning_data = Path('learning_data', data_filename)
@@ -71,7 +70,7 @@ class Agent:
                          alpha: float = 0.7, gamma: float = 0.7, epsilon: float = 0.8,
                          ) -> None:
         """
-        Performs a learning session which modifies agent's q_table and builds a behavioural policy.
+        Performs a learning session which modifies Agent's q_table and builds a behavioural policy.
 
         Parameters
         ----------
@@ -207,7 +206,7 @@ class Agent:
 
     def perform(self, n_episodes: int = 100):
         """
-        Test agent's performance on n_episodes different initial states and prints the number of successful and
+        Test Agent's performance on n_episodes different initial states and prints the number of successful and
         absolutely successful trials.
         """
         n_successful_trials = 0
@@ -260,7 +259,7 @@ class Agent:
 
     def reset(self) -> None:
         """
-        Resets current agent to initial state with no knowledge about environment.
+        Resets current Agent to initial state with no knowledge about Environment.
         """
         self.state = self.env.reset()
         self.q_table: dict[State, dict[int, int]] = \
@@ -268,7 +267,7 @@ class Agent:
 
     def load_q_table_from_file(self, filename: str) -> None:
         """
-        Loads existing q_table from given file to agent's field.
+        Loads existing q_table from given file to Agent's field.
 
         Parameters
         ----------
@@ -318,7 +317,7 @@ class Agent:
 
     def extract_q_table(self, compressed_q_table: dict) -> None:
         """
-        Extracts q_table from given compressed q_table and writes the result into agent's field.
+        Extracts q_table from given compressed q_table and writes the result into Agent's field.
 
         Parameters
         ----------
