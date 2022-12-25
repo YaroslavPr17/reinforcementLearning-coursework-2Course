@@ -1,5 +1,5 @@
 # Reinforcement-Learning_Coursework - 2-course
-Current work investigates basic concepts of reinforcement learning. These ideas were implemented to simulate city-traffic and cars behaviour within an abundance of city-maps. 
+Current work investigates basic concepts of reinforcement learning. These ideas were implemented to simulate city-traffic and cars behaviour within an abundance of various city-maps. 
 
 Instead of using deep-learning approach, this algorithm included so-called transition-states, which generalized others so that agent was able to make decisions in unvisited layouts.
 
